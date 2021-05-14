@@ -15,6 +15,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   List<Asset> images = <Asset>[];
   String _error = 'None';
   var dio = Dio();
+  String _futureGpsLocation = 'DELHI';
 
   _saveImages() async {
     if (images != null) {
@@ -30,6 +31,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
         FormData formdata = FormData.fromMap({
           "image": multipartFile,
+          "userlocation": _futureGpsLocation,
         });
 
         var response = await dio.post(UPLOAD_URL, data: formdata);
