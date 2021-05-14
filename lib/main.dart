@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zz_assetplus_flutter_mysql/views/signin_screen.dart';
+import 'package:zz_assetplus_flutter_mysql/views/authenticated_home_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,7 +11,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: SignInScreen(),
+      debugShowCheckedModeBanner: false,
+      home: AuthenticatedHomeScreen(),
     );
   }
 }
