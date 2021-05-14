@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:dio/dio.dart';
+import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
 import '../constants/strings.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
@@ -132,6 +133,13 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                 ),
                 Expanded(
                   child: buildGridView(),
+                ),
+                ElevatedButton(
+                  child: Text("View Uploaded Images"),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => ViewImages()));
+                  },
                 ),
               ],
             ),
