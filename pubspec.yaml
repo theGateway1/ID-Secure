@@ -25,7 +25,10 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   dio: ^4.0.0
+  exif: ^2.1.0
+  flutter_absolute_path: ^1.0.6
   flutter_easyloading: ^3.0.0
+  geoflutterfire: null
   http_parser: ^4.0.0
   multi_image_picker: ^4.8.0
 

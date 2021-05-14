@@ -37,7 +37,17 @@ class _ViewImagesState extends State<ViewImages> {
       appBar: AppBar(
         title: Text('Images'),
       ),
-      body: FutureBuilder<List>(
+      body:
+          // responseList.isNotEmpty
+          //     ? Center(
+          //         child: Text(
+          //           'Start Uploading images to the database.',
+          //           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          //           textAlign: TextAlign.center,
+          //         ),
+          //       )
+          //     :
+          FutureBuilder<List>(
         future: getImages(),
         builder: (context, snapshot) {
           return ListView.builder(
@@ -45,30 +55,41 @@ class _ViewImagesState extends State<ViewImages> {
             itemBuilder: (context, index) {
               List receivedList = snapshot.data;
               return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         "ID: ${receivedList[index]['id']}",
                         style: TextStyle(
                             fontSize: 19, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.016,
-                    ),
-                    Text(
-                      "Location: ${receivedList[index]['gpslocation']}",
-                      style:
-                          TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                        padding: EdgeInsets.fromLTRB(12, 12, 12, 2),
-                        child: Image.network(
-                            "$IMAGE_URL/${responseList[index]["image"]}")),
-                    DividerHere(),
-                  ],
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
+                      SelectableText(
+                        "Latitude: ${receivedList[index]['latitude']}",
+                        style: TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
+                      SelectableText(
+                        "Longitude: ${receivedList[index]['longitude']}",
+                        style: TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
+                      Container(
+                          child: Image.network(
+                              "$IMAGE_URL/${responseList[index]["image"]}")),
+                      DividerHere(),
+                    ],
+                  ),
                 ),
               );
             },
