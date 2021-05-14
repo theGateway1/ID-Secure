@@ -40,15 +40,15 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  _showSnackBar(BuildContext context, String message) {
-    print('WORKS');
-    // ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  }
+  // _showSnackBar(BuildContext context, String message) {
+  //   print('WORKS');
+  //   // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text(message),
+  //     ),
+  //   );
+  // }
 
   GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
     print('runs GeoFire');
@@ -110,10 +110,10 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         var response = await dio.post(UPLOAD_URL, data: formdata);
         if (response.statusCode == 200) {
           print(response.data);
-          _showSnackBar(context, "Image Uploaded Successfully");
+          // _showSnackBar(context, "Image Uploaded Successfully");
         } else {
           print(response.data);
-          _showSnackBar(context, "Error Occured!");
+          // _showSnackBar(context, "Error Occured!");
         }
       }
     }

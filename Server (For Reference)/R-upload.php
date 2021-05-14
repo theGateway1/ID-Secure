@@ -1,6 +1,8 @@
 <?php
-$db = mysqli_connect('localhost','root','','withgpsuserdata');
-
+$db = mysqli_connect('localhost','id16818881_root','ABCD1234efgh!@','id16818881_withgpsuserdata');
+if(mysqli_connect_error()){
+    echo "Connection Error.";
+}
     $image[] = $_FILES['image']['name'];
     $tmpFile[] = $_FILES['image']['tmp_name'];
     $latitude = $_POST['latitude'];
