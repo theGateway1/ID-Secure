@@ -19,9 +19,7 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   List<Asset> images = <Asset>[];
-  String _error = 'None';
   var dio = Dio();
-  String _futureGpsLocation = 'NEPAL';
   GeoFirePoint thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
@@ -34,11 +32,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
     print('this ran');
     if (imgTags.containsKey('GPS GPSLongitude')) {
-      _showSnackBar(context, "Location Found!");
-      setState(() {
-        _imgHasLocation = true;
-        thisLoc = exifGPSToGeoFirePoint(imgTags);
-      });
+      _imgHasLocation = true;
+      thisLoc = exifGPSToGeoFirePoint(imgTags);
       return thisLoc;
     } else {
       print('Nope, no location');
@@ -87,6 +82,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   _saveImages() async {
     if (images != null) {
       for (var i = 0; i < images.length; i++) {
+        _imgHasLocation = false;
         ByteData byteData = await images[i].getByteData();
         List<int> imageData = byteData.buffer.asInt8List();
 
@@ -97,13 +93,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         );
         imagePathForCheckGps =
             await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
-        await _checkGPSData(imagePathForCheckGps).then((value) => {
-              if (_imgHasLocation == true)
-                {
-                  print("${value.latitude} is lat"),
-                  print("${value.longitude} is long"),
-                }
-            });
+        thisLoc = await _checkGPSData(imagePathForCheckGps);
 
         FormData formdata = FormData.fromMap(
           {
@@ -162,7 +152,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         selectedAssets: images,
         cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
         materialOptions: MaterialOptions(
-          actionBarColor: "#abcdef",
+          // actionBarColor: "#abcdef",
           actionBarTitle: "Pick Images",
           allViewTitle: "All Photos",
           useDetailsView: false,
@@ -180,7 +170,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
     setState(() {
       images = resultList;
-      _error = error;
     });
   }
 
@@ -197,9 +186,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             height: MediaQuery.of(context).size.height * 0.89,
             child: Column(
               children: <Widget>[
-                _error == 'None'
-                    ? Container()
-                    : Center(child: Text('Error: $_error')),
                 Row(
                   mainAxisAlignment: images.isNotEmpty
                       ? MainAxisAlignment.spaceAround
@@ -220,12 +206,15 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                 Expanded(
                   child: buildGridView(),
                 ),
-                ElevatedButton(
-                  child: Text("View Uploaded Images"),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) => ViewImages()));
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: Text("View Uploaded Images"),
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => ViewImages()));
+                    },
+                  ),
                 ),
               ],
             ),
