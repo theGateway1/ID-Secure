@@ -54,6 +54,7 @@ class _ViewImagesState extends State<ViewImages> {
             shrinkWrap: true,
             itemBuilder: (context, index) {
               List receivedList = snapshot.data;
+              receivedList = receivedList.reversed.toList();
               return SingleChildScrollView(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
