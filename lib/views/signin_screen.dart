@@ -119,8 +119,8 @@ class _SignInScreenState extends State<SignInScreen> {
     String res = reso.body.toString();
     // String res = json.decode(reso.data);
 
-    if (res.toString().trim() == "Dont have an account") {
-      _showSnackBar(context, "Account doesnt exist, Create a new account");
+    if (res.toString().trim().contains("Dont have an account")) {
+      _showSnackBar(context, "Account doesn't exist, Create a new account");
     } else {
       if (res.toString().trim() == "true") {
         Navigator.of(context).pushAndRemoveUntil(
@@ -128,7 +128,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 builder: (BuildContext context) => AuthenticatedHomeScreen()),
             (route) => false);
       }
-      if (res.toString().trim() == "false") {
+      if (res.toString().trim().contains("false")) {
         _showSnackBar(context, "Wrong Credentials");
       } else {
         print((res.toString()));
