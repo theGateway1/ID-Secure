@@ -54,7 +54,6 @@ class _ViewImagesState extends State<ViewImages> {
             shrinkWrap: true,
             itemBuilder: (context, index) {
               List receivedList = snapshot.data;
-              receivedList = receivedList.reversed.toList();
               return SingleChildScrollView(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -88,6 +87,14 @@ class _ViewImagesState extends State<ViewImages> {
                       Container(
                           child: Image.network(
                               "$IMAGE_URL/${responseList[index]["image"]}")),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
+                      SelectableText(
+                        "Identity: ${receivedList[index]['identifier']}",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                       DividerHere(),
                     ],
                   ),

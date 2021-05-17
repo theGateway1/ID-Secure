@@ -1,6 +1,7 @@
 <?php
-$db = mysqli_connect('localhost','id16818881_root','ABCD1234efgh!@','id16818881_withgpsuserdata');
-if(mysqli_connect_error()){
+$db = mysqli_connect('localhost','root','','withgpsuserdata');
+if(mysqli_connect_error())
+{
     echo "Connection Error.";
 }
     $image[] = $_FILES['image']['name'];

@@ -104,6 +104,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             "longitude": _imgHasLocation == false
                 ? "Not Found"
                 : thisLoc.longitude.toString(),
+            "identifier": "${images[i].identifier}_${DateTime.now()}",
           },
         );
 
@@ -131,7 +132,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       mainAxisSpacing: 10,
       children: List.generate(images.length, (index) {
         Asset asset = images[index];
-        print("1. ${images[index].identifier}, 2. ${images[index].name}");
+        print("1. ${images[index].identifier}, 2. ${images[index].name}}");
         return AssetThumb(
           asset: asset,
           width: 300,
