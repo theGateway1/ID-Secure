@@ -3,4 +3,4 @@
 This branch
 - Works On: Localhost
 - Authentication: Yes
-- Plugin: Multi_image_picker
+- Plugin: Image_picker
