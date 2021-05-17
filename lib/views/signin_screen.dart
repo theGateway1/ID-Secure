@@ -198,6 +198,7 @@ class _SignInScreenState extends State<SignInScreen> {
           decoration: InputDecoration(
               prefixIcon: Icon(
                 Icons.account_box,
+                color: Colors.blue[400],
               ),
               hintText: 'Email'),
         ),
@@ -206,6 +207,7 @@ class _SignInScreenState extends State<SignInScreen> {
           decoration: InputDecoration(
               prefixIcon: Icon(
                 Icons.lock,
+                color: Colors.blue[400],
               ),
               hintText: 'Password'),
         ),
@@ -242,8 +244,9 @@ class _SignInScreenState extends State<SignInScreen> {
             decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.account_box,
+                  color: Colors.blue[400],
                 ),
-                hintText: 'name'),
+                hintText: 'Name'),
           ),
           TextFormField(
             controller: emailctrl,
@@ -256,8 +259,9 @@ class _SignInScreenState extends State<SignInScreen> {
             decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.account_box,
+                  color: Colors.blue[400],
                 ),
-                hintText: 'email'),
+                hintText: 'Email'),
           ),
           TextFormField(
             controller: passctrl,
@@ -270,8 +274,9 @@ class _SignInScreenState extends State<SignInScreen> {
             decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.lock,
+                  color: Colors.blue[400],
                 ),
-                hintText: 'pass'),
+                hintText: 'Password'),
           ),
           SizedBox(
             height: 10.0,
