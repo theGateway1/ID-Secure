@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:dio/dio.dart';
+// import 'package:flutter/services.dart';
+// import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
 import '../constants/strings.dart';
 import 'package:exif/exif.dart';
@@ -18,11 +18,11 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 }
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
-  List<Asset> images = <Asset>[];
-  var dio = Dio();
   GeoFirePoint thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
+  File image;
+  final picker = ImagePicker();
   GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey(); //Key to get context to show snackbar;
 
@@ -40,15 +40,15 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  // _showSnackBar(BuildContext context, String message) {
-  //   print('WORKS');
-  //   // ScaffoldMessenger.of(context).removeCurrentSnackBar();
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //     ),
-  //   );
-  // }
+  _showSnackBar(BuildContext context, String message) {
+    print('WORKS');
+    // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
 
   GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
     print('runs GeoFire');
@@ -79,99 +79,56 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     return GeoFirePoint(latitude, longitude);
   }
 
+  _clickImg() async {
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        image = File(pickedFile.path);
+      });
+      Navigator.of(context).pop();
+    }
+  }
+
+  _pickImg() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        image = File(pickedFile.path);
+      });
+      Navigator.of(context).pop();
+    }
+  }
+
   _saveImages() async {
-    if (images != null) {
-      for (var i = 0; i < images.length; i++) {
-        _imgHasLocation = false;
-        ByteData byteData = await images[i].getByteData();
-        List<int> imageData = byteData.buffer.asInt8List();
+    _imgHasLocation = false;
 
-        MultipartFile multipartFile = MultipartFile.fromBytes(
-          imageData,
-          filename: images[i].name,
-          contentType: MediaType('image', 'jpg'),
-        );
-        imagePathForCheckGps =
-            await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
-        thisLoc = await _checkGPSData(imagePathForCheckGps);
+    imagePathForCheckGps =
+        await FlutterAbsolutePath.getAbsolutePath(image.path);
+    thisLoc = await _checkGPSData(imagePathForCheckGps);
 
-        FormData formdata = FormData.fromMap(
-          {
-            "image": multipartFile,
-            "latitude": _imgHasLocation == false
-                ? "Not Found"
-                : thisLoc.latitude.toString(),
-            "longitude": _imgHasLocation == false
-                ? "Not Found"
-                : thisLoc.longitude.toString(),
-            "identifier": "${images[i].identifier}_${DateTime.now()}",
-          },
-        );
+    var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
 
-        var response = await dio.post(UPLOAD_URL, data: formdata);
-        if (response.statusCode == 200) {
-          print(response.data);
-          // _showSnackBar(context, "Image Uploaded Successfully");
-        } else {
-          print(response.data);
-          // _showSnackBar(context, "Error Occured!");
-        }
-      }
+    request.fields["latitude"] =
+        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+    request.fields["longitude"] =
+        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+
+    var pic = await http.MultipartFile.fromPath("image", image.path);
+    request.files.add(pic);
+
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print('image uploaded succesfully');
+      _showSnackBar(context, "Image Uploaded Successfully");
+    } else {
+      print(response.statusCode);
+      _showSnackBar(context, "Error Occured!");
     }
   }
 
   @override
   void initState() {
     super.initState();
-  }
-
-  Widget buildGridView() {
-    return GridView.count(
-      crossAxisCount: 1,
-      padding: EdgeInsets.all(15),
-      mainAxisSpacing: 10,
-      children: List.generate(images.length, (index) {
-        Asset asset = images[index];
-        print("1. ${images[index].identifier}, 2. ${images[index].name}}");
-        return AssetThumb(
-          asset: asset,
-          width: 300,
-          height: 300,
-        );
-      }),
-    );
-  }
-
-  Future<void> loadAssets() async {
-    List<Asset> resultList = <Asset>[];
-    String error = 'None';
-
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 300,
-        enableCamera: true,
-        selectedAssets: images,
-        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
-        materialOptions: MaterialOptions(
-          // actionBarColor: "#abcdef",
-          actionBarTitle: "Pick Images",
-          allViewTitle: "All Photos",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      images = resultList;
-    });
   }
 
   @override
@@ -188,25 +145,63 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             child: Column(
               children: <Widget>[
                 Row(
-                  mainAxisAlignment: images.isNotEmpty
+                  mainAxisAlignment: image != null
                       ? MainAxisAlignment.spaceAround
                       : MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
                       child: Text("Pick images"),
-                      onPressed: loadAssets,
+                      onPressed: () {
+                        showModalBottomSheet(
+                            // enableDrag: true,
+                            // elevation: 20,
+
+                            isScrollControlled: true,
+                            context: context,
+                            builder: (context) => Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 15),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.image),
+                                        iconSize: 33,
+                                        color: Theme.of(context).primaryColor,
+                                        onPressed: _pickImg,
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.camera),
+                                        iconSize: 33,
+                                        color: Theme.of(context).primaryColor,
+                                        onPressed: _clickImg,
+                                      ),
+                                    ],
+                                  ),
+                                ));
+                      },
                     ),
-                    images.isNotEmpty
+                    image != null
                         ? ElevatedButton(
-                            child: Text("Upload Images"),
+                            child: Text("Upload Image"),
                             onPressed: _saveImages,
                           )
                         : Container(),
                   ],
                 ),
-                Expanded(
-                  child: buildGridView(),
-                ),
+                image != null
+                    ? Container(
+                        padding: EdgeInsets.all(18),
+                        child: Image.file(image),
+                      )
+                    : Container(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Pick an image',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        )),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
