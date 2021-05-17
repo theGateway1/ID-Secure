@@ -13,6 +13,8 @@ class ViewImages extends StatefulWidget {
 class _ViewImagesState extends State<ViewImages> {
   var dio = Dio();
   List responseList = [];
+  List receivedList = ['123'];
+  List reversedList = [];
 
   Future<List> getImages() async {
     var response = await dio.get(DOWNLOAD_URL);
@@ -53,7 +55,8 @@ class _ViewImagesState extends State<ViewImages> {
           return ListView.builder(
             shrinkWrap: true,
             itemBuilder: (context, index) {
-              List receivedList = snapshot.data;
+              receivedList = snapshot.data;
+              reversedList = receivedList.reversed.toList();
               return SingleChildScrollView(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -61,7 +64,7 @@ class _ViewImagesState extends State<ViewImages> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "ID: ${receivedList[index]['id']}",
+                        "ID: ${reversedList[index]['id']}",
                         style: TextStyle(
                             fontSize: 19, fontWeight: FontWeight.bold),
                       ),
@@ -69,7 +72,7 @@ class _ViewImagesState extends State<ViewImages> {
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
                       SelectableText(
-                        "Latitude: ${receivedList[index]['latitude']}",
+                        "Latitude: ${reversedList[index]['latitude']}",
                         style: TextStyle(
                             fontSize: 19, fontWeight: FontWeight.bold),
                       ),
@@ -77,7 +80,7 @@ class _ViewImagesState extends State<ViewImages> {
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
                       SelectableText(
-                        "Longitude: ${receivedList[index]['longitude']}",
+                        "Longitude: ${reversedList[index]['longitude']}",
                         style: TextStyle(
                             fontSize: 19, fontWeight: FontWeight.bold),
                       ),
@@ -85,13 +88,16 @@ class _ViewImagesState extends State<ViewImages> {
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
                       SelectableText(
-                        "Identity: ${receivedList[index]['identifier']}",
+                        "Date: ${reversedList[index]['date']}",
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
                       ),
                       Container(
                           child: Image.network(
-                              "$IMAGE_URL/${responseList[index]["image"]}")),
+                              "$IMAGE_URL/${reversedList[index]["image"]}")),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),

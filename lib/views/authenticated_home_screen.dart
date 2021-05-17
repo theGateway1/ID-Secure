@@ -10,6 +10,7 @@ import '../constants/strings.dart';
 import 'package:exif/exif.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+import 'package:intl/intl.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
   @override
@@ -91,21 +92,23 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  _pickImg() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        image = File(pickedFile.path);
-        _saveImage();
-      });
-      // Navigator.of(context).pop();
-    }
-  }
+  // _pickImg() async {
+  //   final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       image = File(pickedFile.path);
+  //       _saveImage();
+  //     });
+  //     // Navigator.of(context).pop();
+  //   }
+  // }
 
   _saveImage() async {
     _imgHasLocation = false;
     imageUploaded = false;
 
+    print(
+        "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
     imagePathForCheckGps =
         await FlutterAbsolutePath.getAbsolutePath(image.path);
     thisLoc = await _checkGPSData(imagePathForCheckGps);
@@ -116,6 +119,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
     request.fields["longitude"] =
         _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+    request.fields["date"] =
+        "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
 
     var pic = await http.MultipartFile.fromPath("image", image.path);
     request.files.add(pic);
