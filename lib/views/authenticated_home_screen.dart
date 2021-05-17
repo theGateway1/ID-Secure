@@ -25,6 +25,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   final picker = ImagePicker();
   GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey(); //Key to get context to show snackbar;
+  bool imageUploaded = false;
 
   Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
     print('runs check');
@@ -38,16 +39,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     } else {
       print('Nope, no location');
     }
-  }
-
-  _showSnackBar(BuildContext context, String message) {
-    print('WORKS');
-    // ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
   }
 
   GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
@@ -79,11 +70,22 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     return GeoFirePoint(latitude, longitude);
   }
 
-  _clickImg() async {
+  _showSnackBar(BuildContext context, String message) {
+    print('WORKS');
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
+  Future<PickedFile> _clickImg() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         image = File(pickedFile.path);
+        _saveImage();
       });
       Navigator.of(context).pop();
     }
@@ -94,13 +96,15 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     if (pickedFile != null) {
       setState(() {
         image = File(pickedFile.path);
+        _saveImage();
       });
       Navigator.of(context).pop();
     }
   }
 
-  _saveImages() async {
+  _saveImage() async {
     _imgHasLocation = false;
+    imageUploaded = false;
 
     imagePathForCheckGps =
         await FlutterAbsolutePath.getAbsolutePath(image.path);
@@ -120,6 +124,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     if (response.statusCode == 200) {
       print('image uploaded succesfully');
       _showSnackBar(context, "Image Uploaded Successfully");
+      setState(() {
+        imageUploaded = true;
+      });
     } else {
       print(response.statusCode);
       _showSnackBar(context, "Error Occured!");
@@ -145,9 +152,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             child: Column(
               children: <Widget>[
                 Row(
-                  mainAxisAlignment: image != null
-                      ? MainAxisAlignment.spaceAround
-                      : MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
                       child: Text("Pick images"),
@@ -181,12 +186,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                                 ));
                       },
                     ),
-                    image != null
-                        ? ElevatedButton(
-                            child: Text("Upload Image"),
-                            onPressed: _saveImages,
-                          )
-                        : Container(),
                   ],
                 ),
                 image != null
@@ -202,8 +201,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         )),
+                imageUploaded == true
+                    ? Container(
+                        // height: MediaQuery.of(context).size.height * 0.5,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Image Uploaded Successfully',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ))
+                    : Container(),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
                     child: Text("View Uploaded Images"),
                     onPressed: () {
