@@ -20,6 +20,15 @@ class _SignInScreenState extends State<SignInScreen> {
 
   bool processing = false;
 
+  _showSnackBar(BuildContext context, message) {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -32,9 +41,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Sign In'),
-      ),
+      backgroundColor: Colors.black,
       body: Container(
           padding: EdgeInsets.all(10.0),
           child: SingleChildScrollView(
@@ -81,20 +88,16 @@ class _SignInScreenState extends State<SignInScreen> {
     String res = reso.body.toString();
     // String res = json.decode(reso.data);
 
-    if (res.toString() == "account already exists") {
-      Fluttertoast.showToast(
-          msg: "Account exists, Please login", toastLength: Toast.LENGTH_SHORT);
-    } else if (res.toString() == "true") {
-      // Fluttertoast.showToast(
-      //         msg: "Account created", toastLength: Toast.LENGTH_SHORT)
-      //     .then((value) => {
+    if (res.toString().trim() == "account already exists") {
+      _showSnackBar(context, "Account already Exists - Please Sign In");
+    } else if (res.toString().trim().contains("true")) {
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (BuildContext context) => AuthenticatedHomeScreen()),
           (route) => false);
     } else {
       print(res.toString());
-      Fluttertoast.showToast(msg: "error", toastLength: Toast.LENGTH_SHORT);
+      _showSnackBar(context, "Some Error Occured!");
     }
 
     setState(() {
@@ -116,20 +119,17 @@ class _SignInScreenState extends State<SignInScreen> {
     String res = reso.body.toString();
     // String res = json.decode(reso.data);
 
-    if (res.toString() == "Dont have an account") {
-      Fluttertoast.showToast(
-          msg: "Account doesnt exist, Create a new account",
-          toastLength: Toast.LENGTH_SHORT);
+    if (res.toString().trim() == "Dont have an account") {
+      _showSnackBar(context, "Account doesnt exist, Create a new account");
     } else {
-      if (res.toString() == "true") {
+      if (res.toString().trim() == "true") {
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (BuildContext context) => AuthenticatedHomeScreen()),
             (route) => false);
       }
-      if (res.toString() == "false") {
-        Fluttertoast.showToast(
-            msg: "Incorrect Password", toastLength: Toast.LENGTH_SHORT);
+      if (res.toString().trim() == "false") {
+        _showSnackBar(context, "Wrong Credentials");
       } else {
         print((res.toString()));
       }
