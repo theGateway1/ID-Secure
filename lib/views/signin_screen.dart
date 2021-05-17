@@ -145,6 +145,7 @@ class _SignInScreenState extends State<SignInScreen> {
       padding: EdgeInsets.only(top: 70),
       child: Card(
         elevation: 10.0,
+        color: Colors.grey[100],
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         child: Padding(
@@ -209,19 +210,15 @@ class _SignInScreenState extends State<SignInScreen> {
           height: 10.0,
         ),
         MaterialButton(
-            onPressed: () => userSignIn(),
-            child:
-                //  processing == false
-                //     ?
-                Text(
-              'Sign In',
-              style:
-                  GoogleFonts.varelaRound(fontSize: 18.0, color: Colors.blue),
-            )
-            // : CircularProgressIndicator(
-            //     backgroundColor: Colors.red,
-            //   ),
-            ),
+          onPressed: () => userSignIn(),
+          child: processing == false
+              ? Text(
+                  'Sign In',
+                  style: GoogleFonts.varelaRound(
+                      fontSize: 18.0, color: Colors.blue),
+                )
+              : CircularProgressIndicator(),
+        ),
       ],
     );
   }
@@ -257,17 +254,15 @@ class _SignInScreenState extends State<SignInScreen> {
           height: 10.0,
         ),
         MaterialButton(
-            onPressed: () => registerUser(),
-            child:
-                // processing == false
-                // ?
-                Text(
-              'Sign Up',
-              style:
-                  GoogleFonts.varelaRound(fontSize: 18.0, color: Colors.blue),
-            )
-            // : CircularProgressIndicator(backgroundColor: Colors.red)
-            ),
+          onPressed: () => registerUser(),
+          child: processing == false
+              ? Text(
+                  'Sign Up',
+                  style: GoogleFonts.varelaRound(
+                      fontSize: 18.0, color: Colors.blue),
+                )
+              : CircularProgressIndicator(),
+        ),
       ],
     );
   }
