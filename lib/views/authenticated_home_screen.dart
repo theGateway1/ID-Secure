@@ -153,15 +153,19 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         ),
         body: SingleChildScrollView(
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.89,
+            height: MediaQuery.of(context).size.height * 0.91,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
                       icon: Icon(Icons.camera),
-                      label: Text("Pick images"),
+                      label: Text(
+                        "Pick an image",
+                        style: TextStyle(fontSize: 16),
+                      ),
                       onPressed: () {
                         _clickImg();
                         // showModalBottomSheet(
@@ -201,12 +205,12 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                         child: Image.file(image),
                       )
                     : Container(
-                        height: MediaQuery.of(context).size.height * 0.5,
+                        // height: MediaQuery.of(context).size.height * 0.5,
                         alignment: Alignment.center,
                         child: Text(
                           'Pick an image',
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                              fontSize: 30, fontWeight: FontWeight.bold),
                         ),
                       ),
                 imageUploaded == true
