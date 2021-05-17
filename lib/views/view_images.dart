@@ -84,16 +84,16 @@ class _ViewImagesState extends State<ViewImages> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
+                      SelectableText(
+                        "Identity: ${receivedList[index]['identifier']}",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                       Container(
                           child: Image.network(
                               "$IMAGE_URL/${responseList[index]["image"]}")),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
-                      ),
-                      SelectableText(
-                        "Identity: ${receivedList[index]['identifier']}",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       DividerHere(),
                     ],

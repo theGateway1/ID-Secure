@@ -158,32 +158,32 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                       child: Text("Pick images"),
                       onPressed: () {
                         showModalBottomSheet(
-                            // enableDrag: true,
-                            // elevation: 20,
+                          // enableDrag: true,
+                          // elevation: 20,
 
-                            isScrollControlled: true,
-                            context: context,
-                            builder: (context) => Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 15),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(Icons.image),
-                                        iconSize: 33,
-                                        color: Theme.of(context).primaryColor,
-                                        onPressed: _pickImg,
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.camera),
-                                        iconSize: 33,
-                                        color: Theme.of(context).primaryColor,
-                                        onPressed: _clickImg,
-                                      ),
-                                    ],
-                                  ),
-                                ));
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) => Padding(
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.image),
+                                  iconSize: 33,
+                                  color: Theme.of(context).primaryColor,
+                                  onPressed: _pickImg,
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.camera),
+                                  iconSize: 33,
+                                  color: Theme.of(context).primaryColor,
+                                  onPressed: _clickImg,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -200,7 +200,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                           'Pick an image',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
-                        )),
+                        ),
+                      ),
                 imageUploaded == true
                     ? Container(
                         // height: MediaQuery.of(context).size.height * 0.5,
@@ -216,8 +217,11 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                   child: ElevatedButton(
                     child: Text("View Uploaded Images"),
                     onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => ViewImages()));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => ViewImages(),
+                        ),
+                      );
                     },
                   ),
                 ),
