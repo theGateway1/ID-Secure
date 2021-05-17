@@ -17,6 +17,8 @@ class _SignInScreenState extends State<SignInScreen> {
   bool signin = true;
   var dio = Dio();
   TextEditingController namectrl, emailctrl, passctrl;
+  GlobalKey<FormState> _formkey = GlobalKey();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   bool processing = false;
 
@@ -41,6 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.black,
       body: Container(
           padding: EdgeInsets.all(10.0),
@@ -196,7 +199,7 @@ class _SignInScreenState extends State<SignInScreen> {
               prefixIcon: Icon(
                 Icons.account_box,
               ),
-              hintText: 'email'),
+              hintText: 'Email'),
         ),
         TextField(
           controller: passctrl,
@@ -204,7 +207,7 @@ class _SignInScreenState extends State<SignInScreen> {
               prefixIcon: Icon(
                 Icons.lock,
               ),
-              hintText: 'pass'),
+              hintText: 'Password'),
         ),
         SizedBox(
           height: 10.0,
@@ -224,46 +227,71 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget signUpUi() {
-    return Column(
-      children: <Widget>[
-        TextField(
-          controller: namectrl,
-          decoration: InputDecoration(
-              prefixIcon: Icon(
-                Icons.account_box,
-              ),
-              hintText: 'name'),
-        ),
-        TextField(
-          controller: emailctrl,
-          decoration: InputDecoration(
-              prefixIcon: Icon(
-                Icons.account_box,
-              ),
-              hintText: 'email'),
-        ),
-        TextField(
-          controller: passctrl,
-          decoration: InputDecoration(
-              prefixIcon: Icon(
-                Icons.lock,
-              ),
-              hintText: 'pass'),
-        ),
-        SizedBox(
-          height: 10.0,
-        ),
-        MaterialButton(
-          onPressed: () => registerUser(),
-          child: processing == false
-              ? Text(
-                  'Sign Up',
-                  style: GoogleFonts.varelaRound(
-                      fontSize: 18.0, color: Colors.blue),
-                )
-              : CircularProgressIndicator(),
-        ),
-      ],
+    return Form(
+      key: _formkey,
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            controller: namectrl,
+            validator: (val) {
+              if (val.isEmpty) {
+                return "Please Enter Name";
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.account_box,
+                ),
+                hintText: 'name'),
+          ),
+          TextFormField(
+            controller: emailctrl,
+            validator: (val) {
+              if (val.isEmpty) {
+                return "Please Enter Email";
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.account_box,
+                ),
+                hintText: 'email'),
+          ),
+          TextFormField(
+            controller: passctrl,
+            validator: (val) {
+              if (val.isEmpty) {
+                return "Please Enter Password";
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.lock,
+                ),
+                hintText: 'pass'),
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
+          MaterialButton(
+            onPressed: () {
+              if (_formkey.currentState.validate()) {
+                registerUser();
+              }
+            },
+            child: processing == false
+                ? Text(
+                    'Sign Up',
+                    style: GoogleFonts.varelaRound(
+                        fontSize: 18.0, color: Colors.blue),
+                  )
+                : CircularProgressIndicator(),
+          ),
+        ],
+      ),
     );
   }
 }
