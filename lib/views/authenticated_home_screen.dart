@@ -91,7 +91,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     if (pickedFile != null) {
       setState(() {
         image = File(pickedFile.path);
-        _saveImage();
+        // _saveImage();
+        _fetchImageDetails();
       });
       // Navigator.of(context).pop();
     }
@@ -126,47 +127,109 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  _saveImage() async {
-    imageUploaded = false;
+  TextStyle columnElementTextStyle() {
+    return TextStyle(
+        fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500);
+  }
 
-    print(
-        "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
-    // imagePathForCheckGps =
-    //     await FlutterAbsolutePath.getAbsolutePath(image.path);
-    // thisLoc = await _checkGPSData(imagePathForCheckGps);
+  Widget _stackedImage(
+      File image, String latitude, String longitude, String date, String time) {
+    return Container(
+      child: Stack(
+        // fit: StackFit.expand,
+        alignment: Alignment.topLeft,
+        children: [
+          Image.file(image),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Latitude: $latitude',
+                  style: columnElementTextStyle(),
+                ),
+                Text(
+                  'Longitude: $longitude',
+                  style: columnElementTextStyle(),
+                ),
+                Text(
+                  'Date: $date',
+                  style: columnElementTextStyle(),
+                ),
+                Text(
+                  'Time: $time',
+                  style: columnElementTextStyle(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-    //
+  Future<Widget> _fetchImageDetails() async {
     _imgHasLocation = await getLocPermission();
     print("$_imgHasLocation -> THIS IS FINAL VALUE");
     if (_imgHasLocation == null) {
       _imgHasLocation = await getLocPermission();
     }
-
-    var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
-
-    request.fields["latitude"] =
+    String latitudeForStackedImage =
         _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-    request.fields["longitude"] =
+    String longitudeForStackedImage =
         _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-    request.fields["date"] =
-        "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
-    request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
 
-    var pic = await http.MultipartFile.fromPath("image", image.path);
-    request.files.add(pic);
-
-    var response = await request.send();
-    if (response.statusCode == 200) {
-      print('image uploaded succesfully');
-      _showSnackBar(context, "Image Uploaded Successfully");
-      setState(() {
-        imageUploaded = true;
-      });
-    } else {
-      print(response.statusCode);
-      _showSnackBar(context, "Error Occured!");
-    }
+    String dateForStackedImage =
+        DateFormat.yMMMd().format(DateTime.now()).toString();
+    String timeForStackedImage =
+        DateFormat.Hm().format(DateTime.now()).toString();
+    return _stackedImage(
+      image,
+      latitudeForStackedImage,
+      longitudeForStackedImage,
+      dateForStackedImage,
+      timeForStackedImage,
+    );
   }
+
+  // _saveImage() async {
+  //   imageUploaded = false;
+
+  //   print(
+  //       "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
+
+  //   // _imgHasLocation = await getLocPermission();
+  //   // print("$_imgHasLocation -> THIS IS FINAL VALUE");
+  //   // if (_imgHasLocation == null) {
+  //   //   _imgHasLocation = await getLocPermission();
+  //   // }
+
+  //   var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
+
+  //   // request.fields["latitude"] =
+  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+  //   // request.fields["longitude"] =
+  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+  //   request.fields["date"] =
+  //       "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
+  //   request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
+
+  //   var pic = await http.MultipartFile.fromPath("image", image.path);
+  //   request.files.add(pic);
+
+  //   var response = await request.send();
+  //   if (response.statusCode == 200) {
+  //     print('image uploaded succesfully');
+  //     _showSnackBar(context, "Image Uploaded Successfully");
+  //     setState(() {
+  //       imageUploaded = true;
+  //     });
+  //   } else {
+  //     print(response.statusCode);
+  //     _showSnackBar(context, "Error Occured!");
+  //   }
+  // }
 
   @override
   void initState() {
@@ -205,8 +268,14 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                 image != null
                     ? Container(
                         padding: EdgeInsets.all(18),
-                        child: Image.file(image),
-                      )
+                        child: FutureBuilder(
+                          future: _fetchImageDetails(),
+                          builder: (context, snapshot) {
+                            return snapshot.data;
+                          },
+                        )
+                        //  Image.file(image),
+                        )
                     : Container(
                         // height: MediaQuery.of(context).size.height * 0.5,
                         alignment: Alignment.center,
