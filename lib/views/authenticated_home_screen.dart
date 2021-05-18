@@ -35,7 +35,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   bool imageUploaded = false;
   Geolocator _geolocator = Geolocator();
   static int count = 0;
-  String loadingString = "Loading WIDGET";
+  String loadingString = "LOADING WIDGET";
 
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
@@ -120,7 +120,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     return bytes != null
         ? Image.memory(bytes)
         : Container(
-            child: Text("NOT FOUND"),
+            child: Text("IMAGE NOT FOUND"),
           );
   }
 
