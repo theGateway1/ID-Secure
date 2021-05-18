@@ -35,7 +35,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   bool imageUploaded = false;
   Geolocator _geolocator = Geolocator();
   static int count = 0;
-  String loadingString = "Loading";
+  String loadingString = "Loading WIDGET";
 
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
@@ -85,38 +85,38 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   Future<Widget> _fetchImageDetails() async {
     runstimes++;
-    // if (runstimes < 90) {
-    //Was 3
-    _imgHasLocation = await getLocPermission();
-    print("$_imgHasLocation -> THIS IS FINAL VALUE");
-    if (_imgHasLocation == null) {
+    if (runstimes < 3) {
+      //Was 3
       _imgHasLocation = await getLocPermission();
+      print("$_imgHasLocation -> THIS IS FINAL VALUE");
+      if (_imgHasLocation == null) {
+        _imgHasLocation = await getLocPermission();
+      }
+      String latitudeForStackedImage =
+          _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+      String longitudeForStackedImage =
+          _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+
+      String dateForStackedImage =
+          DateFormat.yMMMd().format(DateTime.now()).toString();
+      String timeForStackedImage =
+          DateFormat.Hm().format(DateTime.now()).toString();
+
+      // print("IT RUNS $runstimes");
+
+      return stackedImage(
+        image,
+        latitudeForStackedImage,
+        longitudeForStackedImage,
+        dateForStackedImage,
+        timeForStackedImage,
+        runstimes,
+      );
     }
-    String latitudeForStackedImage =
-        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-    String longitudeForStackedImage =
-        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-
-    String dateForStackedImage =
-        DateFormat.yMMMd().format(DateTime.now()).toString();
-    String timeForStackedImage =
-        DateFormat.Hm().format(DateTime.now()).toString();
-
-    // print("IT RUNS $runstimes");
-
-    return stackedImage(
-      image,
-      latitudeForStackedImage,
-      longitudeForStackedImage,
-      dateForStackedImage,
-      timeForStackedImage,
-      runstimes,
-    );
-    // }
   }
 
   Widget buildImage(Uint8List bytes) {
-    // uploadBytes();
+    uploadBytes();
     return bytes != null
         ? Image.memory(bytes)
         : Container(
@@ -139,17 +139,16 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     print("Download Here: $downloadUrl");
   }
 
-  void anyHowGetPng() async {
-    if (loadingString != "Loading") {
-      print("IT EVEN RUNS");
-      getPng();
-      await uploadBytes();
-    } else {
-      Timer(Duration(milliseconds: 10), () {
-        anyHowGetPng();
-      });
-    }
-  }
+  // void anyHowGetPng() {
+  //   if (loadingString != "Loading") {
+  //     print("IT EVEN RUNS");
+  //     getPng();
+  //   } else {
+  //     Timer(Duration(seconds: 10), () {
+  //       anyHowGetPng();
+  //     });
+  //   }
+  // }
   // _saveImage() async {
   //   imageUploaded = false;
 
@@ -219,8 +218,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ),
                     onPressed: () {
                       _clickImg().then((value) {
-                        setState(() {
-                          anyHowGetPng();
+                        Timer(Duration(seconds: 4), () {
+                          getPng();
                         });
                       });
                     },
