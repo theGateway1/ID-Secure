@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:zz_assetplus_flutter_mysql/services/firebase_methods.dart';
+
 import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,6 +21,7 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 }
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
+  UploadTask task;
   GlobalKey key1;
   Uint8List bytes1;
   Position thisLoc;
@@ -102,7 +106,13 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Widget buildImage(Uint8List bytes) {
+    uploadBytes();
     return bytes != null ? Image.memory(bytes) : Container();
+  }
+
+  Future uploadBytes() async {
+    print('running');
+    task = FirebaseAPI.uploadBytes('files/', bytes1);
   }
 
   // _saveImage() async {
@@ -180,6 +190,10 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                             setState(() {
                               getPng();
                             });
+                            // if (bytes1 != null) {
+                            //   print('running');
+                            //   FirebaseAPI.uploadBytes('files/', bytes1);
+                            // }
                           },
                         ),
                       );
