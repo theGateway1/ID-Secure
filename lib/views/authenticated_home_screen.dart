@@ -85,7 +85,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   Future<Widget> _fetchImageDetails() async {
     runstimes++;
-    if (runstimes < 8) {
+    if (runstimes < 4) {
       //Was 3
       _imgHasLocation = await getLocPermission();
       print("$_imgHasLocation -> THIS IS FINAL VALUE");
@@ -103,16 +103,15 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
           DateFormat.Hm().format(DateTime.now()).toString();
 
       // print("IT RUNS $runstimes");
-      if (runstimes == 2) {
-        return stackedImage(
-          image,
-          latitudeForStackedImage,
-          longitudeForStackedImage,
-          dateForStackedImage,
-          timeForStackedImage,
-          runstimes,
-        );
-      }
+
+      return stackedImage(
+        image,
+        latitudeForStackedImage,
+        longitudeForStackedImage,
+        dateForStackedImage,
+        timeForStackedImage,
+        runstimes,
+      );
     }
   }
 
