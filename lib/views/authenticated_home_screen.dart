@@ -54,16 +54,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       setState(() {
         image = File(pickedFile.path);
         // _saveImage();
-        _fetchImageDetails().then(
-          (value) => Timer(
-            Duration(seconds: 3),
-            () {
-              setState(() {
-                getPng();
-              });
-            },
-          ),
-        );
+        _fetchImageDetails();
       });
     }
   }
@@ -166,94 +157,100 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       appBar: AppBar(
         title: const Text('Image Upload'),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.camera),
-                      label: Text(
-                        "Pick an image",
-                        style: TextStyle(fontSize: 19),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.camera),
+                    label: Text(
+                      "Pick an image",
+                      style: TextStyle(fontSize: 19),
+                    ),
+                    onPressed: () {
+                      _clickImg().then(
+                        (value) => Timer(
+                          Duration(seconds: 3),
+                          () {
+                            setState(() {
+                              getPng();
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              image != null
+                  ? WidgetToImage(
+                      builder: (key) {
+                        this.key1 = key;
+                        return Container(
+                          padding: EdgeInsets.all(18),
+                          child: FutureBuilder(
+                            future: _fetchImageDetails(),
+                            builder: (context, snapshot) {
+                              return snapshot.hasData
+                                  ? snapshot.data
+                                  : Text('Loading');
+                            },
+                          ),
+
+                          //  Image.file(image),
+                        );
+                      },
+                    )
+                  : Container(
+                      // height: MediaQuery.of(context).size.height * 0.5,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Pick an image',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
                       ),
+                    ),
+              buildImage(bytes1),
+              imageUploaded == true
+                  ? Container(
+                      // height: MediaQuery.of(context).size.height * 0.5,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Image Uploaded Successfully',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ))
+                  : Container(),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton(
+                      child: Text("View Uploaded Images"),
                       onPressed: () {
-                        _clickImg();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => ViewImages()),
+                        );
                       },
                     ),
-                  ],
-                ),
-                image != null
-                    ? WidgetToImage(
-                        builder: (key) {
-                          this.key1 = key;
-                          return Container(
-                            padding: EdgeInsets.all(18),
-                            child: FutureBuilder(
-                              future: _fetchImageDetails(),
-                              builder: (context, snapshot) {
-                                return snapshot.hasData
-                                    ? snapshot.data
-                                    : Text('Loading');
-                              },
-                            ),
-
-                            //  Image.file(image),
-                          );
-                        },
-                      )
-                    : Container(
-                        // height: MediaQuery.of(context).size.height * 0.5,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Pick an image',
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                buildImage(bytes1),
-                imageUploaded == true
-                    ? Container(
-                        // height: MediaQuery.of(context).size.height * 0.5,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Image Uploaded Successfully',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ))
-                    : Container(),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: ElevatedButton(
-                        child: Text("View Uploaded Images"),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton(
+                        child: Text("Get PNG"),
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    ViewImages()),
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: ElevatedButton(
-                          child: Text("Get PNG"),
-                          onPressed: () {
-                            getPng();
-                          }),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                          getPng();
+                        }),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
