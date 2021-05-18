@@ -33,49 +33,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Geolocator _geolocator = Geolocator();
   static int count = 0;
 
-  // Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
-  //   print('runs check');
-  //   Map<String, IfdTag> imgTags =
-  //       await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
-  //   print('this ran');
-  //   if (imgTags.containsKey('GPS GPSLongitude')) {
-  //     _imgHasLocation = true;
-  //     thisLoc = exifGPSToGeoFirePoint(imgTags);
-  //     return thisLoc;
-  //   } else {
-  //     print('Nope, no location');
-  //   }
-  // }
-
-  // GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
-  //   print('runs GeoFire');
-  //   final latitudeValue = tags['GPS GPSLatitude']
-  //       .values
-  //       .map<double>(
-  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-  //       .toList();
-  //   final latitudeSignal = tags['GPS GPSLatitudeRef'].printable;
-
-  //   final longitudeValue = tags['GPS GPSLongitude']
-  //       .values
-  //       .map<double>(
-  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-  //       .toList();
-  //   final longitudeSignal = tags['GPS GPSLongitudeRef'].printable;
-
-  //   double latitude =
-  //       latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
-
-  //   double longitude = longitudeValue[0] +
-  //       (longitudeValue[1] / 60) +
-  //       (longitudeValue[2] / 3600);
-
-  //   if (latitudeSignal == 'S') latitude = -latitude;
-  //   if (longitudeSignal == 'W') longitude = -longitude;
-
-  //   return GeoFirePoint(latitude, longitude);
-  // }
-
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
@@ -94,20 +51,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         // _saveImage();
         _fetchImageDetails();
       });
-      // Navigator.of(context).pop();
     }
   }
-
-  // _pickImg() async {
-  //   final pickedFile = await picker.getImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       image = File(pickedFile.path);
-  //       _saveImage();
-  //     });
-  //     // Navigator.of(context).pop();
-  //   }
-  // }
 
   Future<bool> getLocPermission() async {
     await Geolocator.requestPermission();
@@ -257,7 +202,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                       icon: Icon(Icons.camera),
                       label: Text(
                         "Pick an image",
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 19),
                       ),
                       onPressed: () {
                         _clickImg();
