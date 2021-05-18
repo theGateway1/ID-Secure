@@ -40,6 +40,13 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 
+  getPng() async {
+    final bytes1 = await Utils().capture(key1);
+    setState(() {
+      this.bytes1 = bytes1;
+    });
+  }
+
   Future<PickedFile> _clickImg() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
     if (pickedFile != null) {
@@ -228,14 +235,10 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: ElevatedButton(
-                        child: Text("Get PNG"),
-                        onPressed: () async {
-                          final bytes1 = await Utils().capture(key1);
-                          setState(() {
-                            this.bytes1 = bytes1;
-                          });
-                        },
-                      ),
+                          child: Text("Get PNG"),
+                          onPressed: () {
+                            getPng();
+                          }),
                     ),
                   ],
                 ),
