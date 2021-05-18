@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 // import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+// import 'package:zz_assetplus_flutter_mysql/views/location.dart';
 import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
 import '../constants/strings.dart';
 import 'package:exif/exif.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+// import 'package:geolocator/geolocator.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:intl/intl.dart';
 
