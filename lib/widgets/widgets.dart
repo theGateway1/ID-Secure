@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -14,14 +15,14 @@ Widget DividerHere() {
 
 TextStyle columnElementTextStyle() {
   return TextStyle(
-      fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500);
+      fontSize: 15, color: Colors.black, fontWeight: FontWeight.w500);
 }
 
 Widget stackedImage(
     File image, String latitude, String longitude, String date, String time) {
   return Container(
     decoration: BoxDecoration(
-        color: Colors.black87,
+        color: Color.fromARGB(255, 227, 227, 220),
         border: Border.all(color: Colors.grey, width: 2)),
     child: Column(
       children: [
@@ -57,7 +58,7 @@ Widget stackedImage(
 }
 
 
-// // child: Stack(
+// child: Stack(
 //       // fit: StackFit.expand,
 //       alignment: Alignment.topLeft,
 //       children: [

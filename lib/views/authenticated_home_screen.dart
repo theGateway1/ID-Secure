@@ -142,77 +142,77 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: const Text('Image Upload'),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.camera),
-                      label: Text(
-                        "Pick an image",
-                        style: TextStyle(fontSize: 19),
-                      ),
-                      onPressed: () {
-                        _clickImg();
-                      },
+    return Scaffold(
+      backgroundColor: Colors.white,
+      // Color.fromARGB(1, 238, 254, 257),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: const Text('Image Upload'),
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.camera),
+                    label: Text(
+                      "Pick an image",
+                      style: TextStyle(fontSize: 19),
                     ),
-                  ],
-                ),
-                image != null
-                    ? Container(
-                        padding: EdgeInsets.all(18),
-                        child: FutureBuilder(
-                          future: _fetchImageDetails(),
-                          builder: (context, snapshot) {
-                            return snapshot.data;
-                          },
-                        )
-                        //  Image.file(image),
-                        )
-                    : Container(
-                        // height: MediaQuery.of(context).size.height * 0.5,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Pick an image',
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                imageUploaded == true
-                    ? Container(
-                        // height: MediaQuery.of(context).size.height * 0.5,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Image Uploaded Successfully',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ))
-                    : Container(),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton(
-                    child: Text("View Uploaded Images"),
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => ViewImages()),
-                      );
+                      _clickImg();
                     },
                   ),
+                ],
+              ),
+              image != null
+                  ? Container(
+                      padding: EdgeInsets.all(18),
+                      child: FutureBuilder(
+                        future: _fetchImageDetails(),
+                        builder: (context, snapshot) {
+                          return snapshot.data;
+                        },
+                      )
+                      //  Image.file(image),
+                      )
+                  : Container(
+                      // height: MediaQuery.of(context).size.height * 0.5,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Pick an image',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+              imageUploaded == true
+                  ? Container(
+                      // height: MediaQuery.of(context).size.height * 0.5,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Image Uploaded Successfully',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ))
+                  : Container(),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ElevatedButton(
+                  child: Text("View Uploaded Images"),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => ViewImages()),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
