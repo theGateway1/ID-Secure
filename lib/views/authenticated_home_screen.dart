@@ -135,7 +135,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       return;
     }
     final snapshot = await task.whenComplete(() => {});
-    final downloadUrl = snapshot.ref.getDownloadURL();
+    final downloadUrl = await snapshot.ref.getDownloadURL();
     print("Download Here: $downloadUrl");
   }
 
