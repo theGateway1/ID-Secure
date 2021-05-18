@@ -148,7 +148,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
     request.fields["longitude"] =
         _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-    print("THIS ALREADY DONE");
     request.fields["date"] =
         "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
     request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
