@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:zz_assetplus_flutter_mysql/views/authenticated_home_screen.dart';
 import 'package:zz_assetplus_flutter_mysql/views/signin_screen.dart';
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
   HttpOverrides.global = new MyHttpOverrides();
 }
