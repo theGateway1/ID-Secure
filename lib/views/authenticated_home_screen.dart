@@ -23,6 +23,7 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   UploadTask task;
   GlobalKey key1;
+  static int runstimes = 0;
   Uint8List bytes1;
   Position thisLoc;
   bool _imgHasLocation = false;
@@ -34,6 +35,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   bool imageUploaded = false;
   Geolocator _geolocator = Geolocator();
   static int count = 0;
+  String loadingString = "Loading";
 
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
@@ -82,27 +84,36 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future<Widget> _fetchImageDetails() async {
-    _imgHasLocation = await getLocPermission();
-    print("$_imgHasLocation -> THIS IS FINAL VALUE");
-    if (_imgHasLocation == null) {
+    runstimes++;
+    if (runstimes < 8) {
+      //Was 3
       _imgHasLocation = await getLocPermission();
-    }
-    String latitudeForStackedImage =
-        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-    String longitudeForStackedImage =
-        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+      print("$_imgHasLocation -> THIS IS FINAL VALUE");
+      if (_imgHasLocation == null) {
+        _imgHasLocation = await getLocPermission();
+      }
+      String latitudeForStackedImage =
+          _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+      String longitudeForStackedImage =
+          _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
 
-    String dateForStackedImage =
-        DateFormat.yMMMd().format(DateTime.now()).toString();
-    String timeForStackedImage =
-        DateFormat.Hm().format(DateTime.now()).toString();
-    return stackedImage(
-      image,
-      latitudeForStackedImage,
-      longitudeForStackedImage,
-      dateForStackedImage,
-      timeForStackedImage,
-    );
+      String dateForStackedImage =
+          DateFormat.yMMMd().format(DateTime.now()).toString();
+      String timeForStackedImage =
+          DateFormat.Hm().format(DateTime.now()).toString();
+
+      // print("IT RUNS $runstimes");
+      if (runstimes == 2) {
+        return stackedImage(
+          image,
+          latitudeForStackedImage,
+          longitudeForStackedImage,
+          dateForStackedImage,
+          timeForStackedImage,
+          runstimes,
+        );
+      }
+    }
   }
 
   Widget buildImage(Uint8List bytes) {
@@ -115,6 +126,16 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     task = FirebaseAPI.uploadBytes('files/', bytes1);
   }
 
+  void anyHowGetPng() async {
+    if (loadingString != "Loading") {
+      getPng();
+      // await uploadBytes();
+    } else {
+      Timer(Duration(milliseconds: 10), () {
+        anyHowGetPng();
+      });
+    }
+  }
   // _saveImage() async {
   //   imageUploaded = false;
 
@@ -183,36 +204,25 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                       style: TextStyle(fontSize: 19),
                     ),
                     onPressed: () {
-                      _clickImg().then(
-                        (value) => Timer(
-                          Duration(seconds: 3),
-                          () {
-                            setState(() {
-                              getPng();
-                            });
-                            // if (bytes1 != null) {
-                            //   print('running');
-                            //   FirebaseAPI.uploadBytes('files/', bytes1);
-                            // }
-                          },
-                        ),
-                      );
+                      _clickImg().then((value) {
+                        anyHowGetPng();
+                      });
                     },
                   ),
                 ],
               ),
-              image != null
+              image != null && runstimes < 2
                   ? WidgetToImage(
                       builder: (key) {
                         this.key1 = key;
                         return Container(
-                          padding: EdgeInsets.all(18),
+                          padding: EdgeInsets.all(15),
                           child: FutureBuilder(
                             future: _fetchImageDetails(),
                             builder: (context, snapshot) {
                               return snapshot.hasData
                                   ? snapshot.data
-                                  : Text('Loading');
+                                  : Text(loadingString);
                             },
                           ),
 
