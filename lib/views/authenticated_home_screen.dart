@@ -85,50 +85,65 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   Future<Widget> _fetchImageDetails() async {
     runstimes++;
-    if (runstimes < 4) {
-      //Was 3
+    // if (runstimes < 90) {
+    //Was 3
+    _imgHasLocation = await getLocPermission();
+    print("$_imgHasLocation -> THIS IS FINAL VALUE");
+    if (_imgHasLocation == null) {
       _imgHasLocation = await getLocPermission();
-      print("$_imgHasLocation -> THIS IS FINAL VALUE");
-      if (_imgHasLocation == null) {
-        _imgHasLocation = await getLocPermission();
-      }
-      String latitudeForStackedImage =
-          _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-      String longitudeForStackedImage =
-          _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-
-      String dateForStackedImage =
-          DateFormat.yMMMd().format(DateTime.now()).toString();
-      String timeForStackedImage =
-          DateFormat.Hm().format(DateTime.now()).toString();
-
-      // print("IT RUNS $runstimes");
-
-      return stackedImage(
-        image,
-        latitudeForStackedImage,
-        longitudeForStackedImage,
-        dateForStackedImage,
-        timeForStackedImage,
-        runstimes,
-      );
     }
+    String latitudeForStackedImage =
+        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+    String longitudeForStackedImage =
+        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+
+    String dateForStackedImage =
+        DateFormat.yMMMd().format(DateTime.now()).toString();
+    String timeForStackedImage =
+        DateFormat.Hm().format(DateTime.now()).toString();
+
+    // print("IT RUNS $runstimes");
+
+    return stackedImage(
+      image,
+      latitudeForStackedImage,
+      longitudeForStackedImage,
+      dateForStackedImage,
+      timeForStackedImage,
+      runstimes,
+    );
+    // }
   }
 
   Widget buildImage(Uint8List bytes) {
-    uploadBytes();
-    return bytes != null ? Image.memory(bytes) : Container();
+    // uploadBytes();
+    return bytes != null
+        ? Image.memory(bytes)
+        : Container(
+            child: Text("NOT FOUND"),
+          );
   }
 
   Future uploadBytes() async {
-    print('running');
-    task = FirebaseAPI.uploadBytes('files/', bytes1);
+    if (bytes1 == null) {
+      print("null ret");
+    }
+    final destination = 'files/';
+    task = FirebaseAPI.uploadBytes(destination, bytes1);
+    if (task == null) {
+      print("Task is null");
+      return;
+    }
+    final snapshot = await task.whenComplete(() => {});
+    final downloadUrl = snapshot.ref.getDownloadURL();
+    print("Download Here: $downloadUrl");
   }
 
   void anyHowGetPng() async {
     if (loadingString != "Loading") {
+      print("IT EVEN RUNS");
       getPng();
-      // await uploadBytes();
+      await uploadBytes();
     } else {
       Timer(Duration(milliseconds: 10), () {
         anyHowGetPng();
@@ -204,13 +219,16 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ),
                     onPressed: () {
                       _clickImg().then((value) {
-                        anyHowGetPng();
+                        setState(() {
+                          anyHowGetPng();
+                        });
                       });
                     },
                   ),
                 ],
               ),
-              image != null && runstimes < 2
+              image != null
+                  // && runstimes < 90
                   ? WidgetToImage(
                       builder: (key) {
                         this.key1 = key;
@@ -268,7 +286,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     child: ElevatedButton(
                         child: Text("Get PNG"),
                         onPressed: () {
-                          getPng();
+                          uploadBytes();
                         }),
                   ),
                 ],
