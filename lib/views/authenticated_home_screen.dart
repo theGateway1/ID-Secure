@@ -30,6 +30,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey(); //Key to get context to show snackbar;
   bool imageUploaded = false;
+  Geolocator _geolocator = Geolocator();
+  static int count = 0;
 
   // Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
   //   print('runs check');
@@ -106,25 +108,47 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   //   }
   // }
 
+  Future<bool> getLocPermission() async {
+    await Geolocator.requestPermission();
+    count++;
+    LocationPermission status = await Geolocator.checkPermission();
+    print(status);
+    if (status == LocationPermission.always) {
+      thisLoc = await Geolocator.getCurrentPosition();
+      return true;
+    } else if ((status == LocationPermission.denied ||
+            status == LocationPermission.deniedForever) &&
+        count < 2) {
+      getLocPermission();
+    } else {
+      print("returning false");
+      return false;
+    }
+  }
+
   _saveImage() async {
-    // _imgHasLocation = false;
     imageUploaded = false;
 
     print(
         "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
-    imagePathForCheckGps =
-        await FlutterAbsolutePath.getAbsolutePath(image.path);
+    // imagePathForCheckGps =
+    //     await FlutterAbsolutePath.getAbsolutePath(image.path);
     // thisLoc = await _checkGPSData(imagePathForCheckGps);
-    thisLoc = await Geolocator.getCurrentPosition();
+
+    //
+    _imgHasLocation = await getLocPermission();
+    print("$_imgHasLocation -> THIS IS FINAL VALUE");
+    if (_imgHasLocation == null) {
+      _imgHasLocation = await getLocPermission();
+    }
 
     var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
 
     request.fields["latitude"] =
-        // _imgHasLocation == false ? "Not Found" :
-        thisLoc.latitude.toString();
+        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
     request.fields["longitude"] =
-        // _imgHasLocation == false ? "Not Found" :
-        thisLoc.longitude.toString();
+        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+    print("THIS ALREADY DONE");
     request.fields["date"] =
         "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
     request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
@@ -145,14 +169,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  void getLocPermission() async {
-    await Geolocator.requestPermission();
-  }
-
   @override
   void initState() {
     super.initState();
-    getLocPermission();
   }
 
   @override
@@ -165,7 +184,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         ),
         body: SingleChildScrollView(
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.91,
+            height: MediaQuery.of(context).size.height,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
