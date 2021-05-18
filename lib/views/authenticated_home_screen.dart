@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
 import '../constants/strings.dart';
 import 'package:exif/exif.dart';
+import '../widgets/widgets.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 // import 'package:geolocator/geolocator.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
@@ -72,48 +73,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  TextStyle columnElementTextStyle() {
-    return TextStyle(
-        fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500);
-  }
-
-  Widget _stackedImage(
-      File image, String latitude, String longitude, String date, String time) {
-    return Container(
-      child: Stack(
-        // fit: StackFit.expand,
-        alignment: Alignment.topLeft,
-        children: [
-          Image.file(image),
-          Container(
-            padding: EdgeInsets.all(5),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Latitude: $latitude',
-                  style: columnElementTextStyle(),
-                ),
-                Text(
-                  'Longitude: $longitude',
-                  style: columnElementTextStyle(),
-                ),
-                Text(
-                  'Date: $date',
-                  style: columnElementTextStyle(),
-                ),
-                Text(
-                  'Time: $time',
-                  style: columnElementTextStyle(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<Widget> _fetchImageDetails() async {
     _imgHasLocation = await getLocPermission();
     print("$_imgHasLocation -> THIS IS FINAL VALUE");
@@ -129,7 +88,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         DateFormat.yMMMd().format(DateTime.now()).toString();
     String timeForStackedImage =
         DateFormat.Hm().format(DateTime.now()).toString();
-    return _stackedImage(
+    return stackedImage(
       image,
       latitudeForStackedImage,
       longitudeForStackedImage,
