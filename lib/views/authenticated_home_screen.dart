@@ -1,19 +1,13 @@
 import 'dart:io';
-
+import 'dart:typed_data';
+import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-// import 'package:flutter/services.dart';
-// import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-// import 'package:zz_assetplus_flutter_mysql/views/location.dart';
+import 'package:zz_assetplus_flutter_mysql/utils/utils.dart';
 import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
-import '../constants/strings.dart';
-import 'package:exif/exif.dart';
+import 'package:zz_assetplus_flutter_mysql/widgets/widget_to_img.dart';
 import '../widgets/widgets.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
-// import 'package:geolocator/geolocator.dart';
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:intl/intl.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
@@ -23,6 +17,8 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 }
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
+  GlobalKey key1;
+  Uint8List bytes1;
   Position thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
@@ -97,6 +93,10 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 
+  Widget buildImage(Uint8List bytes) {
+    return bytes != null ? Image.memory(bytes) : Container();
+  }
+
   // _saveImage() async {
   //   imageUploaded = false;
 
@@ -152,67 +152,95 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       body: SingleChildScrollView(
         child: Container(
           height: MediaQuery.of(context).size.height,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.camera),
-                    label: Text(
-                      "Pick an image",
-                      style: TextStyle(fontSize: 19),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.camera),
+                      label: Text(
+                        "Pick an image",
+                        style: TextStyle(fontSize: 19),
+                      ),
+                      onPressed: () {
+                        _clickImg();
+                      },
                     ),
-                    onPressed: () {
-                      _clickImg();
-                    },
-                  ),
-                ],
-              ),
-              image != null
-                  ? Container(
-                      padding: EdgeInsets.all(18),
-                      child: FutureBuilder(
-                        future: _fetchImageDetails(),
-                        builder: (context, snapshot) {
-                          return snapshot.data;
+                  ],
+                ),
+                image != null
+                    ? WidgetToImage(
+                        builder: (key) {
+                          this.key1 = key;
+                          return Container(
+                            padding: EdgeInsets.all(18),
+                            child: FutureBuilder(
+                              future: _fetchImageDetails(),
+                              builder: (context, snapshot) {
+                                return snapshot.hasData
+                                    ? snapshot.data
+                                    : Text('NO DATA FOUND');
+                              },
+                            ),
+
+                            //  Image.file(image),
+                          );
                         },
                       )
-                      //  Image.file(image),
-                      )
-                  : Container(
-                      // height: MediaQuery.of(context).size.height * 0.5,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Pick an image',
-                        style: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold),
+                    : Container(
+                        // height: MediaQuery.of(context).size.height * 0.5,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Pick an image',
+                          style: TextStyle(
+                              fontSize: 30, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                buildImage(bytes1),
+                imageUploaded == true
+                    ? Container(
+                        // height: MediaQuery.of(context).size.height * 0.5,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Image Uploaded Successfully',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ))
+                    : Container(),
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: ElevatedButton(
+                        child: Text("View Uploaded Images"),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    ViewImages()),
+                          );
+                        },
                       ),
                     ),
-              imageUploaded == true
-                  ? Container(
-                      // height: MediaQuery.of(context).size.height * 0.5,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Image Uploaded Successfully',
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ))
-                  : Container(),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: ElevatedButton(
-                  child: Text("View Uploaded Images"),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => ViewImages()),
-                    );
-                  },
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: ElevatedButton(
+                        child: Text("Get PNG"),
+                        onPressed: () async {
+                          final bytes1 = await Utils().capture(key1);
+                          setState(() {
+                            this.bytes1 = bytes1;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
