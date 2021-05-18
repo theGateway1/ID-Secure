@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 // import 'package:flutter/services.dart';
 // import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,7 +22,7 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 }
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
-  GeoFirePoint thisLoc;
+  Position thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
   File image;
@@ -30,48 +31,48 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       GlobalKey(); //Key to get context to show snackbar;
   bool imageUploaded = false;
 
-  Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
-    print('runs check');
-    Map<String, IfdTag> imgTags =
-        await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
-    print('this ran');
-    if (imgTags.containsKey('GPS GPSLongitude')) {
-      _imgHasLocation = true;
-      thisLoc = exifGPSToGeoFirePoint(imgTags);
-      return thisLoc;
-    } else {
-      print('Nope, no location');
-    }
-  }
+  // Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
+  //   print('runs check');
+  //   Map<String, IfdTag> imgTags =
+  //       await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
+  //   print('this ran');
+  //   if (imgTags.containsKey('GPS GPSLongitude')) {
+  //     _imgHasLocation = true;
+  //     thisLoc = exifGPSToGeoFirePoint(imgTags);
+  //     return thisLoc;
+  //   } else {
+  //     print('Nope, no location');
+  //   }
+  // }
 
-  GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
-    print('runs GeoFire');
-    final latitudeValue = tags['GPS GPSLatitude']
-        .values
-        .map<double>(
-            (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-        .toList();
-    final latitudeSignal = tags['GPS GPSLatitudeRef'].printable;
+  // GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
+  //   print('runs GeoFire');
+  //   final latitudeValue = tags['GPS GPSLatitude']
+  //       .values
+  //       .map<double>(
+  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
+  //       .toList();
+  //   final latitudeSignal = tags['GPS GPSLatitudeRef'].printable;
 
-    final longitudeValue = tags['GPS GPSLongitude']
-        .values
-        .map<double>(
-            (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-        .toList();
-    final longitudeSignal = tags['GPS GPSLongitudeRef'].printable;
+  //   final longitudeValue = tags['GPS GPSLongitude']
+  //       .values
+  //       .map<double>(
+  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
+  //       .toList();
+  //   final longitudeSignal = tags['GPS GPSLongitudeRef'].printable;
 
-    double latitude =
-        latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
+  //   double latitude =
+  //       latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
 
-    double longitude = longitudeValue[0] +
-        (longitudeValue[1] / 60) +
-        (longitudeValue[2] / 3600);
+  //   double longitude = longitudeValue[0] +
+  //       (longitudeValue[1] / 60) +
+  //       (longitudeValue[2] / 3600);
 
-    if (latitudeSignal == 'S') latitude = -latitude;
-    if (longitudeSignal == 'W') longitude = -longitude;
+  //   if (latitudeSignal == 'S') latitude = -latitude;
+  //   if (longitudeSignal == 'W') longitude = -longitude;
 
-    return GeoFirePoint(latitude, longitude);
-  }
+  //   return GeoFirePoint(latitude, longitude);
+  // }
 
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
@@ -106,23 +107,27 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   // }
 
   _saveImage() async {
-    _imgHasLocation = false;
+    // _imgHasLocation = false;
     imageUploaded = false;
 
     print(
         "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
     imagePathForCheckGps =
         await FlutterAbsolutePath.getAbsolutePath(image.path);
-    thisLoc = await _checkGPSData(imagePathForCheckGps);
+    // thisLoc = await _checkGPSData(imagePathForCheckGps);
+    thisLoc = await Geolocator.getCurrentPosition();
 
     var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
 
     request.fields["latitude"] =
-        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+        // _imgHasLocation == false ? "Not Found" :
+        thisLoc.latitude.toString();
     request.fields["longitude"] =
-        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+        // _imgHasLocation == false ? "Not Found" :
+        thisLoc.longitude.toString();
     request.fields["date"] =
         "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
+    request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
 
     var pic = await http.MultipartFile.fromPath("image", image.path);
     request.files.add(pic);
@@ -140,9 +145,14 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
+  void getLocPermission() async {
+    await Geolocator.requestPermission();
+  }
+
   @override
   void initState() {
     super.initState();
+    getLocPermission();
   }
 
   @override
@@ -170,33 +180,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                       ),
                       onPressed: () {
                         _clickImg();
-                        // showModalBottomSheet(
-                        //   // enableDrag: true,
-                        //   // elevation: 20,
-
-                        //   isScrollControlled: true,
-                        //   context: context,
-                        //   builder: (context) => Padding(
-                        //     padding: EdgeInsets.symmetric(vertical: 15),
-                        //     child: Row(
-                        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        //       children: [
-                        //         IconButton(
-                        //           icon: Icon(Icons.image),
-                        //           iconSize: 33,
-                        //           color: Theme.of(context).primaryColor,
-                        //           onPressed: _pickImg,
-                        //         ),
-                        //         IconButton(
-                        //           icon: Icon(Icons.camera),
-                        //           iconSize: 33,
-                        //           color: Theme.of(context).primaryColor,
-                        //           onPressed: _clickImg,
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        // );
                       },
                     ),
                   ],
@@ -245,3 +228,32 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 }
+
+//Modal Bottom Sheet
+// showModalBottomSheet(
+//   // enableDrag: true,
+//   // elevation: 20,
+
+//   isScrollControlled: true,
+//   context: context,
+//   builder: (context) => Padding(
+//     padding: EdgeInsets.symmetric(vertical: 15),
+//     child: Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//       children: [
+//         IconButton(
+//           icon: Icon(Icons.image),
+//           iconSize: 33,
+//           color: Theme.of(context).primaryColor,
+//           onPressed: _pickImg,
+//         ),
+//         IconButton(
+//           icon: Icon(Icons.camera),
+//           iconSize: 33,
+//           color: Theme.of(context).primaryColor,
+//           onPressed: _clickImg,
+//         ),
+//       ],
+//     ),
+//   ),
+// );

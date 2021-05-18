@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zz_assetplus_flutter_mysql/views/authenticated_home_screen.dart';
-import 'package:zz_assetplus_flutter_mysql/views/location.dart';
 import 'package:zz_assetplus_flutter_mysql/views/signin_screen.dart';
 
 void main() {
@@ -42,7 +41,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       // home: SignInScreen(),
-      home: GeolocatorWidget(),
+      home: AuthenticatedHomeScreen(),
     );
   }
 }

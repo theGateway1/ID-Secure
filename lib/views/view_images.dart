@@ -95,6 +95,14 @@ class _ViewImagesState extends State<ViewImages> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
+                      SelectableText(
+                        "Time: ${reversedList[index]['time']}",
+                        style: TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
                       Container(
                           child: Image.network(
                               "$IMAGE_URL/${reversedList[index]["image"]}")),
