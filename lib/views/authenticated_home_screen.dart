@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import '../utils/utils.dart';
@@ -53,7 +54,16 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       setState(() {
         image = File(pickedFile.path);
         // _saveImage();
-        _fetchImageDetails();
+        _fetchImageDetails().then(
+          (value) => Timer(
+            Duration(seconds: 3),
+            () {
+              setState(() {
+                getPng();
+              });
+            },
+          ),
+        );
       });
     }
   }
@@ -189,7 +199,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                               builder: (context, snapshot) {
                                 return snapshot.hasData
                                     ? snapshot.data
-                                    : Text('NO DATA FOUND');
+                                    : Text('Loading');
                               },
                             ),
 
