@@ -35,6 +35,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   bool imageUploaded = false;
   Geolocator _geolocator = Geolocator();
   static int count = 0;
+  static int urlcount = 0;
+  String downUrl = "";
   String loadingString = "LOADING WIDGET";
 
   _showSnackBar(BuildContext context, String message) {
@@ -55,6 +57,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future<PickedFile> _clickImg() async {
+    // setNullAgain();
     final pickedFile = await picker.getImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
@@ -129,13 +132,19 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       print("null ret");
     }
     final destination = 'files/';
-    task = FirebaseAPI.uploadBytes(destination, bytes1);
+    task = FirebaseAPI.uploadBytes(destination, bytes1, urlcount);
     if (task == null) {
       print("Task is null");
       return;
     }
     final snapshot = await task.whenComplete(() => {});
     final downloadUrl = await snapshot.ref.getDownloadURL();
+    if (downloadUrl.contains("firebasestorage")) {
+      urlcount++;
+      setState(() {
+        downUrl = downloadUrl;
+      });
+    }
     print("Download Here: $downloadUrl");
   }
 
@@ -185,6 +194,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   //     print(response.statusCode);
   //     _showSnackBar(context, "Error Occured!");
   //   }
+  // }
+
+  // setNullAgain() {
+  //   task = null;
+  //   key1 = null;
+  //   runstimes = 0;
+  //   bytes1 = null;
+  //   image = null;
+  //   count = 0;
+  //   urlcount = 0;
+  //   downUrl = "";
+  //   loadingString = "LOADING WIDGET";
   // }
 
   @override
@@ -255,6 +276,27 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                             fontSize: 30, fontWeight: FontWeight.bold),
                       ),
                     ),
+              Container(
+                padding: EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 1)),
+                child: downUrl != null
+                    ? Column(
+                        children: [
+                          SelectableText(
+                            downUrl,
+                          ),
+                          SizedBox(
+                            height: 4,
+                          ),
+                          DividerHere(),
+                          Text(
+                            "Image Upload Count: ${urlcount.toString()}",
+                          ),
+                        ],
+                      )
+                    : Text("Currently NULL"),
+              ),
               buildImage(bytes1),
               imageUploaded == true
                   ? Container(
