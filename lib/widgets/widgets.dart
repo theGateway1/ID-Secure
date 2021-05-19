@@ -13,8 +13,8 @@ Widget DividerHere() {
   );
 }
 
-TextStyle imageUrlStyle(FontWeight fontweight) {
-  return TextStyle(fontSize: 15, color: Colors.black, fontWeight: fontweight);
+TextStyle imageUrlStyle(Color color, FontWeight fontweight) {
+  return TextStyle(fontSize: 15, color: color, fontWeight: fontweight);
 }
 
 TextStyle columnElementTextStyle() {

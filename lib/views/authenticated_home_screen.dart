@@ -13,6 +13,8 @@ import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
 import 'package:zz_assetplus_flutter_mysql/widgets/widget_to_img.dart';
 import '../widgets/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
   @override
@@ -119,14 +121,36 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
+  Future<void> _onOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      await launch(link.url);
+    } else {
+      throw 'Could not launch $link';
+    }
+  }
+
   Widget buildImage(Uint8List bytes) {
     uploadBytes();
     return bytes != null
         // ? Image.memory(bytes)
-        ? Container(child: Text("Starting Upload"))
-        : Container(
-            child: Text("IMAGE NOT FOUND"),
-          );
+        ? Container(
+            child: downUrl == ""
+                ? Text(
+                    "Starting Upload",
+                    style: columnElementTextStyle(),
+                  )
+                : downUrl.contains("firebasestorage")
+                    ? Text("Upload Successful", style: columnElementTextStyle())
+                    : Text(
+                        'Error Occured!',
+                        style: columnElementTextStyle(),
+                      ))
+        : image != null
+            // ? Container(
+            //     child: Text("IMAGE NOT FOUND"),
+            //   )
+            ? Container()
+            : Container();
   }
 
   Future uploadBytes() async {
@@ -227,133 +251,136 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.camera),
-                    label: Text(
-                      "Pick an image",
-                      style: TextStyle(fontSize: 19),
-                    ),
-                    onPressed: () {
-                      _clickImg().then((value) {
-                        Timer(Duration(seconds: 4), () {
-                          getPng();
-                        });
+        child: ListView(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(Icons.camera),
+                  label: Text(
+                    "Pick an image",
+                    style: TextStyle(fontSize: 19),
+                  ),
+                  onPressed: () {
+                    _clickImg().then((value) {
+                      Timer(Duration(seconds: 4), () {
+                        getPng();
                       });
+                    });
+                  },
+                ),
+              ],
+            ),
+            Container(
+              padding: EdgeInsets.all(7),
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 2)),
+                child: downUrl != null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            image == null
+                                ? "Pick an image"
+                                : downUrl.contains("firebasestorage")
+                                    ? "Image URL:"
+                                    : "Fetching",
+                            style: image == null
+                                ? TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold)
+                                : imageUrlStyle(Colors.black, FontWeight.bold),
+                          ),
+                          image == null
+                              ? Container()
+                              : SizedBox(
+                                  height: 2,
+                                ),
+                          image != null && downUrl.contains("firebasestorage")
+                              ? SelectableLinkify(
+                                  onOpen: _onOpen,
+                                  text: downUrl,
+                                  options: LinkifyOptions(humanize: false),
+                                  style: imageUrlStyle(
+                                      Colors.blue, FontWeight.normal),
+                                )
+                              : Container(),
+                        ],
+                      )
+                    : Text("Currently NULL"),
+              ),
+            ),
+            image != null
+                // && runstimes < 90
+                ? WidgetToImage(
+                    builder: (key) {
+                      this.key1 = key;
+                      return Container(
+                        padding: EdgeInsets.all(15),
+                        child: FutureBuilder(
+                            future: _fetchImageDetails(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData &&
+                                  (snapshot.connectionState ==
+                                          ConnectionState.active ||
+                                      snapshot.connectionState ==
+                                          ConnectionState.done)) {
+                                thisWasCardWidget = snapshot.data;
+                                return snapshot.data;
+                              }
+                              return thisWasCardWidget == null
+                                  ? Text('Loading')
+                                  : thisWasCardWidget;
+                            }),
+
+                        //  Image.file(image),
+                      );
+                    },
+                  )
+                : Container(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildImage(bytes1),
+              ],
+            ),
+            imageUploaded == true
+                ? Container(
+                    // height: MediaQuery.of(context).size.height * 0.5,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Image Uploaded Successfully',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ))
+                : Container(),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: ElevatedButton(
+                    child: Text("View Uploaded Images"),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => ViewImages()),
+                      );
                     },
                   ),
-                ],
-              ),
-              image != null
-                  // && runstimes < 90
-                  ? WidgetToImage(
-                      builder: (key) {
-                        this.key1 = key;
-                        return Container(
-                          padding: EdgeInsets.all(15),
-                          child: FutureBuilder(
-                              future: _fetchImageDetails(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData &&
-                                    (snapshot.connectionState ==
-                                            ConnectionState.active ||
-                                        snapshot.connectionState ==
-                                            ConnectionState.done)) {
-                                  thisWasCardWidget = snapshot.data;
-                                  return snapshot.data;
-                                }
-                                return thisWasCardWidget == null
-                                    ? Text('Loading')
-                                    : thisWasCardWidget;
-                              }),
-
-                          //  Image.file(image),
-                        );
-                      },
-                    )
-                  : Container(
-                      // height: MediaQuery.of(context).size.height * 0.5,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Pick an image',
-                        style: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-              Container(
-                padding: EdgeInsets.all(7),
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey, width: 1)),
-                  child: downUrl != null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Image URL:",
-                              style: imageUrlStyle(FontWeight.bold),
-                            ),
-                            SelectableText(
-                              downUrl,
-                              style: imageUrlStyle(FontWeight.normal),
-                            ),
-                            SizedBox(
-                              height: 4,
-                            ),
-                            DividerHere(),
-                            Text(
-                              "Image Upload Count: ${urlcount.toString()}",
-                              style: imageUrlStyle(FontWeight.normal),
-                            ),
-                          ],
-                        )
-                      : Text("Currently NULL"),
                 ),
-              ),
-              buildImage(bytes1),
-              imageUploaded == true
-                  ? Container(
-                      // height: MediaQuery.of(context).size.height * 0.5,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Image Uploaded Successfully',
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ))
-                  : Container(),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: ElevatedButton(
-                      child: Text("View Uploaded Images"),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: ElevatedButton(
+                      child: Text("Get PNG"),
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (BuildContext context) => ViewImages()),
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: ElevatedButton(
-                        child: Text("Get PNG"),
-                        onPressed: () {
-                          uploadBytes();
-                        }),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                        uploadBytes();
+                      }),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
