@@ -288,24 +288,34 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ),
               Container(
                 padding: EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1)),
-                child: downUrl != null
-                    ? Column(
-                        children: [
-                          SelectableText(
-                            downUrl,
-                          ),
-                          SizedBox(
-                            height: 4,
-                          ),
-                          DividerHere(),
-                          Text(
-                            "Image Upload Count: ${urlcount.toString()}",
-                          ),
-                        ],
-                      )
-                    : Text("Currently NULL"),
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey, width: 1)),
+                  child: downUrl != null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Image URL:",
+                              style: imageUrlStyle(FontWeight.bold),
+                            ),
+                            SelectableText(
+                              downUrl,
+                              style: imageUrlStyle(FontWeight.normal),
+                            ),
+                            SizedBox(
+                              height: 4,
+                            ),
+                            DividerHere(),
+                            Text(
+                              "Image Upload Count: ${urlcount.toString()}",
+                              style: imageUrlStyle(FontWeight.normal),
+                            ),
+                          ],
+                        )
+                      : Text("Currently NULL"),
+                ),
               ),
               buildImage(bytes1),
               imageUploaded == true

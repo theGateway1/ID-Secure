@@ -13,6 +13,10 @@ Widget DividerHere() {
   );
 }
 
+TextStyle imageUrlStyle(FontWeight fontweight) {
+  return TextStyle(fontSize: 15, color: Colors.black, fontWeight: fontweight);
+}
+
 TextStyle columnElementTextStyle() {
   return TextStyle(
       fontSize: 15, color: Colors.black, fontWeight: FontWeight.w500);
