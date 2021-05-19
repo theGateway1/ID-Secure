@@ -41,6 +41,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   String downUrl = "";
   Widget thisWasCardWidget = null;
   String loadingString = "LOADING WIDGET";
+  UploadTask task3;
 
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
@@ -51,6 +52,27 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       ),
     );
   }
+
+  Widget buildUploadStatus(UploadTask task3) => StreamBuilder<TaskSnapshot>(
+      stream: task3.snapshotEvents,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final snap = snapshot.data;
+          final progress = snap.bytesTransferred / snap.totalBytes;
+          final percentage = progress * 100;
+          return Container(
+            child: Text(
+              'Progress: ${percentage.toString()}',
+              style: columnElementTextStyle(),
+            ),
+          );
+        } else {
+          print("IT IS EMPTY IN WIDGET");
+          return Container(
+            child: Text('EMPTY EMPTY EMPTY'),
+          );
+        }
+      });
 
   getPng() async {
     final bytes1 = await Utils().capture(key1);
@@ -140,7 +162,10 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     style: columnElementTextStyle(),
                   )
                 : downUrl.contains("firebasestorage")
-                    ? Text("Upload Successful", style: columnElementTextStyle())
+                    ? Text(
+                        "Upload Successful",
+                        style: columnElementTextStyle(),
+                      )
                     : Text(
                         'Error Occured!',
                         style: columnElementTextStyle(),
@@ -159,9 +184,17 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, bytes1, urlcount);
+
     if (task == null) {
       print("Task is null");
       return;
+    }
+
+    task3 = task;
+    setState(() {});
+
+    if (task3 == null) {
+      print("EMPTY TASK3");
     }
     final snapshot = await task.whenComplete(() => {});
     final downloadUrl = await snapshot.ref.getDownloadURL();
@@ -233,6 +266,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     downUrl = "";
     loadingString = "LOADING WIDGET";
     thisWasCardWidget = null;
+    task3 = null;
   }
 
   @override
@@ -282,6 +316,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          task != null ? buildUploadStatus(task3) : Container(),
                           Text(
                             image == null
                                 ? "Pick an image"
@@ -331,7 +366,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                                 return snapshot.data;
                               }
                               return thisWasCardWidget == null
-                                  ? Text('Loading')
+                                  ? Text('')
                                   : thisWasCardWidget;
                             }),
 
