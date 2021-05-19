@@ -41,7 +41,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   String downUrl = "";
   Widget thisWasCardWidget = null;
   String loadingString = "LOADING WIDGET";
-  UploadTask task3;
 
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
@@ -53,10 +52,13 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 
-  Widget buildUploadStatus(UploadTask task3) => StreamBuilder<TaskSnapshot>(
-      stream: task3.snapshotEvents,
+  Widget buildUploadStatus(UploadTask task) => StreamBuilder<TaskSnapshot>(
+      stream: task.snapshotEvents,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        print(snapshot.connectionState.toString());
+        if (snapshot.connectionState == ConnectionState.done ||
+            snapshot.connectionState == ConnectionState.active ||
+            snapshot.hasData) {
           final snap = snapshot.data;
           final progress = snap.bytesTransferred / snap.totalBytes;
           final percentage = progress * 100;
@@ -184,20 +186,14 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, bytes1, urlcount);
-
+    setState(() {});
     if (task == null) {
       print("Task is null");
       return;
     }
-
-    task3 = task;
-    setState(() {});
-
-    if (task3 == null) {
-      print("EMPTY TASK3");
-    }
     final snapshot = await task.whenComplete(() => {});
     final downloadUrl = await snapshot.ref.getDownloadURL();
+
     if (downloadUrl.contains("firebasestorage")) {
       urlcount++;
       setState(() {
@@ -266,7 +262,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     downUrl = "";
     loadingString = "LOADING WIDGET";
     thisWasCardWidget = null;
-    task3 = null;
   }
 
   @override
@@ -312,11 +307,12 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey, width: 2)),
-                child: downUrl != null
+                child: image != null
+                    // downUrl != null
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          task != null ? buildUploadStatus(task3) : Container(),
+                          task != null ? buildUploadStatus(task) : Container(),
                           Text(
                             image == null
                                 ? "Pick an image"
