@@ -57,7 +57,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future<PickedFile> _clickImg() async {
-    // setNullAgain();
+    setNullAgain();
     final pickedFile = await picker.getImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
@@ -196,17 +196,17 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   //   }
   // }
 
-  // setNullAgain() {
-  //   task = null;
-  //   key1 = null;
-  //   runstimes = 0;
-  //   bytes1 = null;
-  //   image = null;
-  //   count = 0;
-  //   urlcount = 0;
-  //   downUrl = "";
-  //   loadingString = "LOADING WIDGET";
-  // }
+  setNullAgain() {
+    task = null;
+    key1 = null;
+    runstimes = 0;
+    bytes1 = null;
+    image = null;
+    count = 0;
+    urlcount = 0;
+    downUrl = "";
+    loadingString = "LOADING WIDGET";
+  }
 
   @override
   void initState() {
