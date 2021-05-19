@@ -26,6 +26,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   UploadTask task;
   GlobalKey key1;
   static int runstimes = 0;
+  static int uploadFunctionTimes = 0;
   Uint8List bytes1;
   Position thisLoc;
   bool _imgHasLocation = false;
@@ -71,8 +72,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         } else {
           print("IT IS EMPTY IN WIDGET");
           return Container(
-            child: Text('EMPTY EMPTY EMPTY'),
-          );
+              // child:
+              // Text('EMPTY EMPTY EMPTY'),
+              );
         }
       });
 
@@ -154,7 +156,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Widget buildImage(Uint8List bytes) {
-    uploadBytes();
+    if (bytes != null) {
+      uploadBytes();
+    }
     return bytes != null
         // ? Image.memory(bytes)
         ? Container(
@@ -181,26 +185,38 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future uploadBytes() async {
-    if (bytes1 == null) {
-      print("null ret");
-    }
-    final destination = 'files/';
-    task = FirebaseAPI.uploadBytes(destination, bytes1, urlcount);
-    setState(() {});
-    if (task == null) {
-      print("Task is null");
-      return;
-    }
-    final snapshot = await task.whenComplete(() => {});
-    final downloadUrl = await snapshot.ref.getDownloadURL();
+    uploadFunctionTimes++;
+    if (uploadFunctionTimes < 2) {
+      print("$uploadFunctionTimes is the total times");
 
-    if (downloadUrl.contains("firebasestorage")) {
-      urlcount++;
-      setState(() {
-        downUrl = downloadUrl;
-      });
+      if (bytes1 == null) {
+        print("null ret");
+      }
+      final destination = 'files/';
+      task = FirebaseAPI.uploadBytes(destination, bytes1, urlcount);
+      setState(() {});
+      if (task == null) {
+        print("Task is null");
+        return;
+      }
+
+      if (task != null) {
+        print("$uploadFunctionTimes THE NOT NULL TIME");
+
+        print(
+            "IT HAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPENED");
+      }
+      final snapshot = await task.whenComplete(() => {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      if (downloadUrl.contains("firebasestorage")) {
+        urlcount++;
+        setState(() {
+          downUrl = downloadUrl;
+        });
+      }
+      print("Download Here: $downloadUrl");
     }
-    print("Download Here: $downloadUrl");
   }
 
   // void anyHowGetPng() {
@@ -262,6 +278,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     downUrl = "";
     loadingString = "LOADING WIDGET";
     thisWasCardWidget = null;
+    uploadFunctionTimes = 0;
   }
 
   @override
@@ -340,7 +357,14 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                               : Container(),
                         ],
                       )
-                    : Text("Currently NULL"),
+                    : Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "Pick an image",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
               ),
             ),
             image != null
@@ -387,30 +411,27 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ))
                 : Container(),
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton(
-                    child: Text("View Uploaded Images"),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => ViewImages()),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton(
-                      child: Text("Get PNG"),
-                      onPressed: () {
-                        uploadBytes();
-                      }),
-                ),
-              ],
+
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: ElevatedButton(
+                child: Text("View Uploaded Images"),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => ViewImages()),
+                  );
+                },
+              ),
             ),
+            // Padding(
+            //   padding: const EdgeInsets.all(12.0),
+            //   child: ElevatedButton(
+            //       child: Text("Get PNG"),
+            //       onPressed: () {
+            //         uploadBytes();
+            //       }),
+            // ),
           ],
         ),
       ),
