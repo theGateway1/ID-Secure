@@ -63,6 +63,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
           final snap = snapshot.data;
           final progress = snap.bytesTransferred / snap.totalBytes;
           final percentage = progress * 100;
+
           return Container(
             child: Text(
               'Progress: ${percentage.toString()}',
@@ -98,20 +99,23 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future<bool> getLocPermission() async {
-    await Geolocator.requestPermission();
-    count++;
-    LocationPermission status = await Geolocator.checkPermission();
-    print(status);
-    if (status == LocationPermission.always) {
-      thisLoc = await Geolocator.getCurrentPosition();
-      return true;
-    } else if ((status == LocationPermission.denied ||
-            status == LocationPermission.deniedForever) &&
-        count < 2) {
-      getLocPermission();
-    } else {
-      print("returning false");
-      return false;
+    if (count < 1) {
+      await Geolocator.requestPermission();
+      count++;
+
+      print("permission asked $count times for location");
+      LocationPermission status = await Geolocator.checkPermission();
+      print(status);
+      if (status == LocationPermission.always) {
+        thisLoc = await Geolocator.getCurrentPosition();
+        return true;
+      } else if ((status == LocationPermission.denied ||
+          status == LocationPermission.deniedForever)) {
+        getLocPermission();
+      } else {
+        print("returning false");
+        return false;
+      }
     }
   }
 
@@ -194,6 +198,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       }
       final destination = 'files/';
       task = FirebaseAPI.uploadBytes(destination, bytes1, urlcount);
+
       setState(() {});
       if (task == null) {
         print("Task is null");
@@ -284,6 +289,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   @override
   void initState() {
     super.initState();
+    getLocPermission();
   }
 
   @override
