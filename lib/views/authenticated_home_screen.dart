@@ -37,6 +37,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   static int count = 0;
   static int urlcount = 0;
   String downUrl = "";
+  Widget thisWasCardWidget = null;
   String loadingString = "LOADING WIDGET";
 
   _showSnackBar(BuildContext context, String message) {
@@ -121,7 +122,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Widget buildImage(Uint8List bytes) {
     uploadBytes();
     return bytes != null
-        ? Image.memory(bytes)
+        // ? Image.memory(bytes)
+        ? Container(child: Text("Starting Upload"))
         : Container(
             child: Text("IMAGE NOT FOUND"),
           );
@@ -206,6 +208,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     urlcount = 0;
     downUrl = "";
     loadingString = "LOADING WIDGET";
+    thisWasCardWidget = null;
   }
 
   @override
@@ -255,13 +258,20 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                         return Container(
                           padding: EdgeInsets.all(15),
                           child: FutureBuilder(
-                            future: _fetchImageDetails(),
-                            builder: (context, snapshot) {
-                              return snapshot.hasData
-                                  ? snapshot.data
-                                  : Text(loadingString);
-                            },
-                          ),
+                              future: _fetchImageDetails(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData &&
+                                    (snapshot.connectionState ==
+                                            ConnectionState.active ||
+                                        snapshot.connectionState ==
+                                            ConnectionState.done)) {
+                                  thisWasCardWidget = snapshot.data;
+                                  return snapshot.data;
+                                }
+                                return thisWasCardWidget == null
+                                    ? Text('Loading')
+                                    : thisWasCardWidget;
+                              }),
 
                           //  Image.file(image),
                         );
