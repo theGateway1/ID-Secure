@@ -15,7 +15,6 @@ import '../widgets/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:async/async.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
   @override
@@ -43,8 +42,12 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   String downUrl = "";
   Widget thisWasCardWidget = null;
   String loadingString = "LOADING WIDGET";
-  AsyncMemoizer _memoizer;
   int isReturningImage = 0;
+  String latitudeForStackedImage = "null";
+  String longitudeForStackedImage = "null";
+  String dateForStackedImage = "null";
+  String timeForStackedImage = "null";
+  static int runBuildImageOnlyOnce = 0;
 
   setNullAgain() {
     task = null;
@@ -54,29 +57,81 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     image = null;
     imageUploaded = false;
     count = 0;
-
+    isReturningImage = 0;
     urlcount = 0;
     downUrl = "";
     thisWasCardWidget = null;
     loadingString = "LOADING WIDGET";
-    isReturningImage = 0;
+    latitudeForStackedImage = "null";
+    longitudeForStackedImage = "null";
+    dateForStackedImage = "null";
+    timeForStackedImage = "null";
+    runBuildImageOnlyOnce = 0;
   }
 
-  Stream<Uint8List> lookAtReturningWidget() {
-    if (isReturningImage == 1) {
-      getPng();
+  Future<PickedFile> _clickImg() async {
+    print("1 - Click Image is running");
+    setNullAgain();
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        image = File(pickedFile.path);
+        // _saveImage();
+        _fetchImageDetails().then(
+          (value) =>
+              // Timer(Duration(seconds: 5), () {
+              getPng().then((bytesHere) => uploadBytes(bytesHere)),
+          // }),
+        );
+      });
     }
   }
 
-  thisStreamBuilder() => StreamBuilder<Uint8List>(
-        stream: lookAtReturningWidget(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return buildImage(snapshot.data);
-          }
-          return Text("I don't have data");
-        },
-      );
+  Future<Widget> _fetchImageDetails() async {
+    runstimes++;
+    _imgHasLocation = await getLocPermission();
+
+    if (_imgHasLocation == null) {
+      _imgHasLocation = await getLocPermission();
+    }
+    latitudeForStackedImage =
+        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+    longitudeForStackedImage =
+        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+
+    dateForStackedImage = DateFormat.yMMMd().format(DateTime.now()).toString();
+    timeForStackedImage = DateFormat.Hm().format(DateTime.now()).toString();
+
+    print("2- Fetch Image is running");
+
+    return stackedImage(
+      image,
+      latitudeForStackedImage,
+      longitudeForStackedImage,
+      dateForStackedImage,
+      timeForStackedImage,
+      runstimes,
+    );
+  }
+
+  Future<bool> getLocPermission() async {
+    await Geolocator.requestPermission();
+    count++;
+
+    print("permission asked $count times for location");
+    LocationPermission status = await Geolocator.checkPermission();
+    print(status);
+    if (status == LocationPermission.always) {
+      thisLoc = await Geolocator.getCurrentPosition();
+      return true;
+    } else if ((status == LocationPermission.denied ||
+        status == LocationPermission.deniedForever)) {
+      getLocPermission();
+    } else {
+      print("returning false");
+      return false;
+    }
+  }
 
   Future<Uint8List> getPng() async {
     //Get a proper PNG after 5 seconds
@@ -97,29 +152,31 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Widget buildImage(Uint8List sendMebytes) {
     print(
         "4 - Build Image is running before getting bytes or something: Suspect");
-    return sendMebytes != null
-        ? Image.memory(sendMebytes)
-        : Container(
-            child: image == null
-                ? Text(
-                    "Select an image",
-                    style: columnElementTextStyle(),
-                  )
-                : downUrl.contains("firebasestorage")
-                    ? Text(
-                        "Upload Successful",
-                        style: columnElementTextStyle(),
-                      )
-                    : Text(
-                        'Loading image file',
-                        style: columnElementTextStyle(),
-                      ));
-    //  image != null
-    //     ? Container(
-    //         child: Text("IMAGE NOT FOUND"),
-    //       )
-    //     // ? Container()
-    //     : Container();
+    if (runBuildImageOnlyOnce < 2) {
+      return sendMebytes != null
+          ? Image.memory(sendMebytes)
+          : Container(
+              child: image == null
+                  ? Text(
+                      "Select an image",
+                      style: columnElementTextStyle(),
+                    )
+                  : downUrl.contains("firebasestorage")
+                      ? Text(
+                          "Upload Successful",
+                          style: columnElementTextStyle(),
+                        )
+                      : Text(
+                          'Loading image file',
+                          style: columnElementTextStyle(),
+                        ));
+      //  image != null
+      //     ? Container(
+      //         child: Text("IMAGE NOT FOUND"),
+      //       )
+      //     // ? Container()
+      //     : Container();
+    }
   }
 
   Future uploadBytes(Uint8List thisbytes) async {
@@ -127,7 +184,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       print("null ret");
     }
     final destination = 'files/';
-    task = FirebaseAPI.uploadBytes(destination, thisbytes);
+    task = FirebaseAPI.uploadBytes(destination, thisbytes, urlcount);
 
     setState(() {});
     if (task == null) {
@@ -245,7 +302,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _memoizer = AsyncMemoizer();
     getLocPermission();
   }
 
@@ -334,7 +390,14 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                       return Container(
                         padding: EdgeInsets.all(15),
                         child: FutureBuilder<Widget>(
-                            future: _fetchImageDetails(),
+                            future: stackedImage(
+                              image,
+                              latitudeForStackedImage,
+                              longitudeForStackedImage,
+                              dateForStackedImage,
+                              timeForStackedImage,
+                              runstimes,
+                            ),
                             builder: (context, snapshot) {
                               if (snapshot.hasData &&
                                   (snapshot.connectionState ==
