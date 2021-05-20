@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 Widget DividerHere() {
   return Text(
-    '________________________________________________________________________________________',
+    '---------------------------------------------------------------------------------',
     softWrap: false,
     overflow: TextOverflow.clip,
     style: TextStyle(

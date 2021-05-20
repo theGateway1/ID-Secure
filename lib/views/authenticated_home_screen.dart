@@ -194,8 +194,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, thisbytes);
 
-//This setstate has been upgraded with setstate(){} in getpngg
-    // setState(() {});
+// This setstate has been upgraded with setstate(){} in getpngg
+    setState(() {});
     if (task == null) {
       print("Task is null");
       return;
@@ -239,8 +239,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
           return Container(
             child: Text(
-              'Progress: ${percentage.toString()}',
-              style: columnElementTextStyle(),
+              'Progress: ${percentage.toString()}%',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
           );
         } else {
@@ -343,7 +343,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // task != null ? buildUploadStatus(task) : Container(),
+                          task != null ? buildUploadStatus(task) : Container(),
+                          DividerHere(),
                           Text(
                             image == null
                                 ? "Pick an image"
