@@ -186,6 +186,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, thisbytes, urlcount);
 
+//Due to this set state, the lat and long are set at correct time.
     setState(() {});
     if (task == null) {
       print("Task is null");
