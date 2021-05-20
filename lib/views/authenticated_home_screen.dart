@@ -129,7 +129,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       thisLoc = await Geolocator.getCurrentPosition();
       return true;
     } else if ((status == LocationPermission.denied ||
-        status == LocationPermission.deniedForever)) {
+            status == LocationPermission.deniedForever) &&
+        count < 2) {
       getLocPermission();
     } else {
       print("returning false");
