@@ -54,11 +54,12 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     image = null;
     imageUploaded = false;
     count = 0;
-    isReturningImage = 0;
+
     urlcount = 0;
     downUrl = "";
     thisWasCardWidget = null;
     loadingString = "LOADING WIDGET";
+    isReturningImage = 0;
   }
 
   Future<PickedFile> _clickImg() async {
@@ -69,19 +70,20 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       setState(() {
         image = File(pickedFile.path);
         // _saveImage();
-        _fetchImageDetails().then(
-          (value) =>
-              // Timer(Duration(seconds: 5), () {
-              getPng().then((bytesHere) => uploadBytes(bytesHere)),
-          // }),
-        );
+        _fetchImageDetails();
+        // .then(
+        //   (value) =>
+
+        //       getPng().then((bytesHere) => uploadBytes(bytesHere)),
+
+        // );
       });
     }
   }
 
   Future<Widget> _fetchImageDetails() async {
     // return this._memoizer.runOnce(() async {
-    runstimes++;
+    // runstimes++;
     _imgHasLocation = await getLocPermission();
 
     if (_imgHasLocation == null) {
@@ -100,7 +102,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     print("2- Fetch Image is running");
 
     isReturningImage = 1;
-    return stackedImage(
+    // setState(() {});
+    return stackedImageNotModel(
       image,
       latitudeForStackedImage,
       longitudeForStackedImage,
@@ -111,6 +114,22 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
     // });
   }
+
+  Stream<Uint8List> lookAtReturningWidget() {
+    if (isReturningImage == 1) {
+      getPng();
+    }
+  }
+
+  thisStreamBuilder() => StreamBuilder<Uint8List>(
+        stream: lookAtReturningWidget(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return buildImage(snapshot.data);
+          }
+          return Text("I don't have data");
+        },
+      );
 
   Future<bool> getLocPermission() async {
     await Geolocator.requestPermission();

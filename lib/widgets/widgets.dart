@@ -22,8 +22,8 @@ TextStyle columnElementTextStyle() {
       fontSize: 15, color: Colors.black, fontWeight: FontWeight.w500);
 }
 
-Widget stackedImage(File image, String latitude, String longitude, String date,
-    String time, int count) {
+Widget stackedImageNotModel(File image, String latitude, String longitude,
+    String date, String time, int count) {
   return Container(
     decoration: BoxDecoration(
         color: Color.fromARGB(255, 227, 227, 220),
