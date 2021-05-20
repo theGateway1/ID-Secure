@@ -139,7 +139,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future<Uint8List> getPng() async {
-    //Get a proper PNG after 5 seconds
+    //Get a proper PNG after 1 second
     setState(() {});
     print("3 - Get PNG is running: Suspect");
     Timer(Duration(seconds: 1), () async {
@@ -178,12 +178,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                           style: columnElementTextStyle(),
                         ),
             );
-      //  image != null
-      //     ? Container(
-      //         child: Text("IMAGE NOT FOUND"),
-      //       )
-      //     // ? Container()
-      //     : Container();
     }
   }
 
@@ -447,11 +441,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                   ? Center(child: Text(""))
                   : thisImageProb,
             ),
-            // ],
-            // ),
+
             imageUploaded == true
                 ? Container(
-                    // height: MediaQuery.of(context).size.height * 0.5,
                     alignment: Alignment.center,
                     child: Text(
                       'Image Uploaded Successfully',
@@ -472,14 +464,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                 },
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(12.0),
-            //   child: ElevatedButton(
-            //       child: Text("Get PNG"),
-            //       onPressed: () {
-            //         uploadBytes();
-            //       }),
-            // ),
           ],
         ),
       ),

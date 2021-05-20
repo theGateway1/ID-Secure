@@ -39,17 +39,7 @@ class _ViewImagesState extends State<ViewImages> {
       appBar: AppBar(
         title: Text('Images'),
       ),
-      body:
-          // responseList.isNotEmpty
-          //     ? Center(
-          //         child: Text(
-          //           'Start Uploading images to the database.',
-          //           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          //           textAlign: TextAlign.center,
-          //         ),
-          //       )
-          //     :
-          FutureBuilder<List>(
+      body: FutureBuilder<List>(
         future: getImages(),
         builder: (context, snapshot) {
           return ListView.builder(
