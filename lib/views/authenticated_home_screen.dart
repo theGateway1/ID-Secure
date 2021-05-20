@@ -77,13 +77,13 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       setState(() {
         image = File(pickedFile.path);
         // _saveImage();
-        _fetchImageDetails().then(
-          (value) => getPng().then(
-            (bytesHere) =>
-                //Get Png is returning null bytes.
-                uploadBytes(bytesHere),
-          ),
-        );
+        _fetchImageDetails().then((value) => getPng()
+            // .then(
+            //   (bytesHere) =>
+            //       //Get Png is returning null bytes.
+            //       uploadBytes(bytesHere),
+            // ),
+            );
       });
     }
   }
@@ -157,6 +157,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Widget buildImage(Uint8List sendMebytes) {
     print(
         "4 - Build Image is running before getting bytes or something: Suspect");
+    uploadBytes(sendMebytes);
     if (runBuildImageOnlyOnce < 2) {
       return sendMebytes != null
           ? Image.memory(sendMebytes)
@@ -174,7 +175,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                       : Text(
                           'Loading image file',
                           style: columnElementTextStyle(),
-                        ));
+                        ),
+            );
       //  image != null
       //     ? Container(
       //         child: Text("IMAGE NOT FOUND"),
