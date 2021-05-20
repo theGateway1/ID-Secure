@@ -42,7 +42,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Provider<StackedImage>(
+    return ChangeNotifierProvider<StackedImage>(
       create: (_) => StackedImage(),
       child: MaterialApp(
         title: 'Flutter Demo',

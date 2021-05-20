@@ -62,59 +62,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     isReturningImage = 0;
   }
 
-  Future<PickedFile> _clickImg() async {
-    print("1 - Click Image is running");
-    setNullAgain();
-    final pickedFile = await picker.getImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      setState(() {
-        image = File(pickedFile.path);
-        // _saveImage();
-        _fetchImageDetails();
-        // .then(
-        //   (value) =>
-
-        //       getPng().then((bytesHere) => uploadBytes(bytesHere)),
-
-        // );
-      });
-    }
-  }
-
-  Future<Widget> _fetchImageDetails() async {
-    // return this._memoizer.runOnce(() async {
-    // runstimes++;
-    _imgHasLocation = await getLocPermission();
-
-    if (_imgHasLocation == null) {
-      _imgHasLocation = await getLocPermission();
-    }
-    String latitudeForStackedImage =
-        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-    String longitudeForStackedImage =
-        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-
-    String dateForStackedImage =
-        DateFormat.yMMMd().format(DateTime.now()).toString();
-    String timeForStackedImage =
-        DateFormat.Hm().format(DateTime.now()).toString();
-
-    print("2- Fetch Image is running");
-
-    isReturningImage = 1;
-    // setState(() {});
-    return stackedImageNotModel(
-      image,
-      latitudeForStackedImage,
-      longitudeForStackedImage,
-      dateForStackedImage,
-      timeForStackedImage,
-      runstimes,
-    );
-
-    // });
-  }
-
   Stream<Uint8List> lookAtReturningWidget() {
     if (isReturningImage == 1) {
       getPng();
@@ -130,25 +77,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
           return Text("I don't have data");
         },
       );
-
-  Future<bool> getLocPermission() async {
-    await Geolocator.requestPermission();
-    count++;
-
-    print("permission asked $count times for location");
-    LocationPermission status = await Geolocator.checkPermission();
-    print(status);
-    if (status == LocationPermission.always) {
-      thisLoc = await Geolocator.getCurrentPosition();
-      return true;
-    } else if ((status == LocationPermission.denied ||
-        status == LocationPermission.deniedForever)) {
-      getLocPermission();
-    } else {
-      print("returning false");
-      return false;
-    }
-  }
 
   Future<Uint8List> getPng() async {
     //Get a proper PNG after 5 seconds
