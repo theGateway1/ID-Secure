@@ -106,6 +106,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     print("2- Fetch Image is running");
 
     return Container();
+
+    //Fetch image doesn't need to return this widget, as stacked image is set as future in future builder.
     // stackedImage(
     //   image,
     //   latitudeForStackedImage,
@@ -185,7 +187,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Future uploadBytes(Uint8List thisbytes) async {
     print("5 - The upload step");
     if (thisbytes == null) {
-      print("null ret");
+      print("null returned");
     }
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, thisbytes, urlcount);
@@ -386,6 +388,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                         padding: EdgeInsets.all(15),
                         child: FutureBuilder<Widget>(
                             future: stackedImage(
+                              //Major Change: Instead of fetchimage, use stacked image widget by converting it to future<Widget>
                               image,
                               latitudeForStackedImage,
                               longitudeForStackedImage,
