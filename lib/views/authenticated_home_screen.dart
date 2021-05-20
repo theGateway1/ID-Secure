@@ -130,7 +130,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       return true;
     } else if ((status == LocationPermission.denied ||
             status == LocationPermission.deniedForever) &&
-        count < 2) {
+        count < 1) {
       getLocPermission();
     } else {
       print("returning false");
