@@ -396,7 +396,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                               longitudeForStackedImage,
                               dateForStackedImage,
                               timeForStackedImage,
-                              runstimes,
+                              // runstimes,
                             ),
                             builder: (context, snapshot) {
                               if (snapshot.hasData &&

@@ -23,7 +23,7 @@ TextStyle columnElementTextStyle() {
 }
 
 Future<Widget> stackedImage(File image, String latitude, String longitude,
-    String date, String time, int count) async {
+    String date, String time) async {
   await Future.delayed(Duration(microseconds: 2));
   return Container(
     decoration: BoxDecoration(
@@ -53,10 +53,10 @@ Future<Widget> stackedImage(File image, String latitude, String longitude,
                 'Time: $time',
                 style: columnElementTextStyle(),
               ),
-              SelectableText(
-                'Count: $count',
-                style: columnElementTextStyle(),
-              ),
+              // SelectableText(
+              //   'Count: $count',
+              //   style: columnElementTextStyle(),
+              // ),
             ],
           ),
         ),
