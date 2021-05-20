@@ -239,16 +239,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
           return Container(
             child: Text(
-              'Progress: ${percentage.toString()}%',
+              'Progress: ${percentage.toStringAsFixed(2)}%',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
           );
         } else {
           print("IT IS EMPTY IN WIDGET");
           return Container(
-              // child:
-              // Text('EMPTY EMPTY EMPTY'),
-              );
+            child: Text(
+              'Progress: ',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          );
         }
       });
 
@@ -320,16 +322,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  icon: Icon(Icons.camera),
-                  label: Text(
-                    "Pick an image",
-                    style: TextStyle(fontSize: 19),
-                  ),
-                  onPressed: () {
-                    _clickImg();
-                  },
-                ),
+                image != null
+                    ? ElevatedButton.icon(
+                        icon: Icon(Icons.camera),
+                        label: Text(
+                          "Pick an image",
+                          style: TextStyle(fontSize: 19),
+                        ),
+                        onPressed: () {
+                          _clickImg();
+                        },
+                      )
+                    : Container(),
               ],
             ),
             Container(
@@ -343,7 +347,14 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          task != null ? buildUploadStatus(task) : Container(),
+                          task != null
+                              ? buildUploadStatus(task)
+                              : Text(
+                                  'Progress: ',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700),
+                                ),
                           DividerHere(),
                           Text(
                             image == null
@@ -372,12 +383,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                               : Container(),
                         ],
                       )
-                    : Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Pick an image",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                    : InkWell(
+                        onTap: _clickImg,
+                        child: Container(
+                          color: Color.fromARGB(255, 227, 227, 220),
+                          alignment: Alignment.center,
+                          height: 450,
+                          padding: EdgeInsets.all(0),
+                          child: Text(
+                            "Pick an Image",
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
               ),
@@ -424,7 +441,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             Container(
               color: Colors.white,
               width: MediaQuery.of(context).size.width * 0.9,
-              height: thisImageProb == null ? 400 : 600,
+              height: thisImageProb == null ? 40 : 600,
               child: thisImageProb == null
                   ? Center(child: Text(""))
                   : thisImageProb,
