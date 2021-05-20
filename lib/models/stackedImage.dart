@@ -34,7 +34,7 @@ class StackedImage extends ChangeNotifier {
     _imgHasLocation = await getLocPermission();
 
     if (_imgHasLocation == null) {
-      _imgHasLocation = await getLocPermission();
+      _imgHasLocation = await getLocPermission(); //get location
     }
     String latitudeForStackedImage =
         _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
