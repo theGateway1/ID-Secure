@@ -137,7 +137,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     print("3 - Get PNG is running: Suspect");
     Timer(Duration(seconds: 1), () async {
       Uint8List bytes2 = null;
-      bytes2 = await Utils().capture(key1); //TODO: Was final instead of var
+      bytes2 = await Utils().capture(key1);
       print(bytes2.toString());
       print("IS BYTES2");
 
@@ -185,7 +185,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, thisbytes, urlcount);
 
-//Due to this set state, the lat and long are set at correct time.
+//This setstate has been upgraded with setstate(){} in getpngg
     // setState(() {});
     if (task == null) {
       print("Task is null");
@@ -251,16 +251,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  // void anyHowGetPng() {
-  //   if (loadingString != "Loading") {
-  //     print("IT EVEN RUNS");
-  //     getPng();
-  //   } else {
-  //     Timer(Duration(seconds: 10), () {
-  //       anyHowGetPng();
-  //     });
-  //   }
-  // }
   // _saveImage() async {
   //   imageUploaded = false;
 
@@ -421,7 +411,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             //   mainAxisAlignment: MainAxisAlignment.start,
             //   children: [
             Container(
-              color: Color.fromARGB(255, 227, 227, 220),
+              color: Colors.white,
               width: MediaQuery.of(context).size.width * 0.9,
               height: thisImageProb == null ? 400 : 600,
               child: thisImageProb == null
