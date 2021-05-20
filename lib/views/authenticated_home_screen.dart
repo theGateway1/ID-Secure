@@ -470,32 +470,3 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 }
-
-//Modal Bottom Sheet
-// showModalBottomSheet(
-//   // enableDrag: true,
-//   // elevation: 20,
-
-//   isScrollControlled: true,
-//   context: context,
-//   builder: (context) => Padding(
-//     padding: EdgeInsets.symmetric(vertical: 15),
-//     child: Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//       children: [
-//         IconButton(
-//           icon: Icon(Icons.image),
-//           iconSize: 33,
-//           color: Theme.of(context).primaryColor,
-//           onPressed: _pickImg,
-//         ),
-//         IconButton(
-//           icon: Icon(Icons.camera),
-//           iconSize: 33,
-//           color: Theme.of(context).primaryColor,
-//           onPressed: _clickImg,
-//         ),
-//       ],
-//     ),
-//   ),
-// );
