@@ -104,14 +104,15 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
     print("2- Fetch Image is running");
 
-    return stackedImage(
-      image,
-      latitudeForStackedImage,
-      longitudeForStackedImage,
-      dateForStackedImage,
-      timeForStackedImage,
-      runstimes,
-    );
+    return Container();
+    // stackedImage(
+    //   image,
+    //   latitudeForStackedImage,
+    //   longitudeForStackedImage,
+    //   dateForStackedImage,
+    //   timeForStackedImage,
+    //   runstimes,
+    // );
   }
 
   Future<bool> getLocPermission() async {
@@ -135,6 +136,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   Future<Uint8List> getPng() async {
     //Get a proper PNG after 5 seconds
+    setState(() {});
     print("3 - Get PNG is running: Suspect");
     Timer(Duration(seconds: 5), () async {
       Uint8List bytes2 = null;
@@ -187,7 +189,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     task = FirebaseAPI.uploadBytes(destination, thisbytes, urlcount);
 
 //Due to this set state, the lat and long are set at correct time.
-    setState(() {});
+    // setState(() {});
     if (task == null) {
       print("Task is null");
       return;
