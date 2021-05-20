@@ -78,10 +78,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         image = File(pickedFile.path);
         // _saveImage();
         _fetchImageDetails().then(
-          (value) =>
-              // Timer(Duration(seconds: 5), () {
-              getPng().then((bytesHere) => uploadBytes(bytesHere)),
-          // }),
+          (value) => getPng().then((bytesHere) => uploadBytes(bytesHere)),
         );
       });
     }
@@ -138,7 +135,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     //Get a proper PNG after 5 seconds
     setState(() {});
     print("3 - Get PNG is running: Suspect");
-    Timer(Duration(seconds: 5), () async {
+    Timer(Duration(seconds: 2), () async {
       Uint8List bytes2 = null;
       bytes2 = await Utils().capture(key1); //TODO: Was final instead of var
       print(bytes2.toString());
