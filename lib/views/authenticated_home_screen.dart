@@ -135,7 +135,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     //Get a proper PNG after 5 seconds
     setState(() {});
     print("3 - Get PNG is running: Suspect");
-    Timer(Duration(seconds: 2), () async {
+    Timer(Duration(seconds: 1), () async {
       Uint8List bytes2 = null;
       bytes2 = await Utils().capture(key1); //TODO: Was final instead of var
       print(bytes2.toString());
@@ -421,10 +421,12 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             //   mainAxisAlignment: MainAxisAlignment.start,
             //   children: [
             Container(
-              color: Colors.red,
-              width: 300,
-              height: 300,
-              child: thisImageProb == null ? Text("WOHOHOHOH") : thisImageProb,
+              color: Color.fromARGB(255, 227, 227, 220),
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: thisImageProb == null ? 400 : 600,
+              child: thisImageProb == null
+                  ? Center(child: Text(""))
+                  : thisImageProb,
             ),
             // ],
             // ),
