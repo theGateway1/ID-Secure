@@ -78,7 +78,11 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         image = File(pickedFile.path);
         // _saveImage();
         _fetchImageDetails().then(
-          (value) => getPng().then((bytesHere) => uploadBytes(bytesHere)),
+          (value) => getPng().then(
+            (bytesHere) =>
+                //Get Png is returning null bytes.
+                uploadBytes(bytesHere),
+          ),
         );
       });
     }
@@ -179,6 +183,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Future uploadBytes(Uint8List thisbytes) async {
+    print("5 - The upload step");
     if (thisbytes == null) {
       print("null ret");
     }
