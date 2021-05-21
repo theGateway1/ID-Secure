@@ -1,6 +1,5 @@
 <?php
     include_once("dbconfig.php");
-
     $email = $_POST["email"];
     $pass = $_POST["pass"];
 
@@ -9,15 +8,13 @@
     $res = mysqli_query($con,$query);
     $data = mysqli_fetch_array($res);
 
-    
-
-    //data[0]=id, data[1]=name, data[2]=email, data[3]=pass
-    if($data[2] >= 1){
-        //account already exists.
+    if($data[0] >= 1){ //THIS WAS MAIN ERROR
+        //account exists
         $query = "SELECT * FROM userdata WHERE pass LIKE '$pass'";
         $res = mysqli_query($con,$query);
         $data = mysqli_fetch_array($res);
 
+        //data[0]=id, data[1]=name, data[2]=email, data[3]=pass
         if($data[3] == $pass){
             //password matched
            echo "true";

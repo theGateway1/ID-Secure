@@ -10,7 +10,7 @@
     $res = mysqli_query($con,$query);
     $data = mysqli_fetch_array($res);
 
-    if($data[2] >= 1){
+    if($data[0] >= 1){// THIS WAS MAIN ERROR TOO
         //account already exists.
         echo "account already exists";
 

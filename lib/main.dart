@@ -2,8 +2,6 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:zz_assetplus_flutter_mysql/views/authenticated_home_screen.dart';
-import 'package:zz_assetplus_flutter_mysql/views/signin_screen.dart';
 import 'package:zz_assetplus_flutter_mysql/views/splash_screen.dart';
 
 Future main() async {
