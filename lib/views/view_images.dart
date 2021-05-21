@@ -88,6 +88,12 @@ class _ViewImagesState extends State<ViewImages> {
                       Container(
                           child: Image.network(
                               "$IMAGE_URL/${responseList[index]["image"]}")),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
+                      Container(
+                          child: Image.network(
+                              "$IMAGE_URL/${responseList[index]["downurl"]}")),
                       DividerHere(),
                     ],
                   ),
