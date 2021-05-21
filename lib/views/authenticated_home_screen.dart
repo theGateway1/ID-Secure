@@ -49,6 +49,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   String dateForStackedImage = "null";
   String timeForStackedImage = "null";
   static int runBuildImageOnlyOnce = 0;
+  String dbUploadProgress = "Database Upload Progress ";
 
   setNullAgain() {
     task = null;
@@ -152,7 +153,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     uploadBytes(sendMebytes).then((value) => _saveImage(sendMebytes));
     if (runBuildImageOnlyOnce < 2) {
       return sendMebytes != null
-          ? Image.memory(sendMebytes)
+          ? Container()
+          // Image.memory(sendMebytes)
           : Container(
               child: image == null
                   ? Text(
@@ -181,7 +183,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     task = FirebaseAPI.uploadBytes(destination, thisbytes);
 
 // This setstate has been upgraded with setstate(){} in getpngg
-    setState(() {});
+    setState(() {}); //Still this is necessary to know the upload progress
     if (task == null) {
       print("Task is null");
       return;
@@ -250,6 +252,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   _saveImage(Uint8List bytesHere) async {
     print("6 - Save Image is running");
+
     imageUploaded = false;
 
     var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
@@ -266,9 +269,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
       print('image uploaded succesfully');
       imageUploaded = true;
       // _showSnackBar(context, "Image Uploaded Successfully");
-      // setState(() {
-      //   imageUploaded = true;
-      // });
+      setState(() {
+        imageUploaded = true;
+      });
     } else {
       print(response.statusCode);
       print("error occured");
@@ -336,7 +339,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                                 ? "Pick an image"
                                 : downUrl.contains("firebasestorage")
                                     ? "Image URL:"
-                                    : "Fetching",
+                                    : "Waiting for Upload to complete",
                             style: image == null
                                 ? TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold)
@@ -356,6 +359,22 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                                       Colors.blue, FontWeight.normal),
                                 )
                               : Container(),
+                          imageUploaded == true
+                              ? Column(
+                                  children: [
+                                    DividerHere(),
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "Upload to database successful",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ))
+                                  ],
+                                )
+                              : Container()
+                          // : Container(),
                         ],
                       )
                     : InkWell(
@@ -380,7 +399,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     builder: (key) {
                       this.key1 = key;
                       return Container(
-                        padding: EdgeInsets.all(15),
+                        padding: EdgeInsets.fromLTRB(15, 15, 15, 2),
                         child: FutureBuilder<Widget>(
                             future: stackedImage(
                               //Major Change: Instead of fetchimage, use stacked image widget by converting it to future<Widget>
@@ -413,27 +432,27 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.start,
             //   children: [
-            Container(
-              color: Colors.white,
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: thisImageProb == null ? 40 : 600,
-              child: thisImageProb == null
-                  ? Center(child: Text(""))
-                  : thisImageProb,
-            ),
+            // Container(
+            //   color: Colors.white,
+            //   width: MediaQuery.of(context).size.width * 0.9,
+            //   height: thisImageProb == null ? 40 : 600,
+            //   child: thisImageProb == null
+            //       ? Center(child: Text(""))
+            //       : thisImageProb,
+            // ),
 
-            imageUploaded == true
-                ? Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Image Uploaded Successfully',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ))
-                : Container(),
+            // imageUploaded == true
+            //     ? Container(
+            //         alignment: Alignment.center,
+            //         child: Text(
+            //           'Image Uploaded Successfully',
+            //           style:
+            //               TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            //         ))
+            //     : Container(),
 
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 child: Text("View Uploaded Images"),
                 onPressed: () {
