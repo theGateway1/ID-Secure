@@ -82,12 +82,10 @@ class _SignInScreenState extends State<SignInScreen> {
     print("is the email");
 
     var data = {
-      "email": emailctrl.text.toString(),
-      "name": namectrl.text.toString(),
-      "pass": passctrl.text.toString(),
+      "email": emailctrl.text.toString().trim(),
+      "name": namectrl.text.toString().trim(),
+      "pass": passctrl.text.toString().trim(),
     };
-    print(data.toString());
-    print("THIS IS THE MAP");
 
     var reso = await http.post(Uri.parse(SIGN_UP_URL), body: data);
     String res = reso.body.toString();
@@ -115,27 +113,19 @@ class _SignInScreenState extends State<SignInScreen> {
       processing = true;
     });
 
-    var datas = {
+    var data = {
       "email": emailctrl.text.toString().trim(),
       "pass": passctrl.text.toString().trim(),
     };
-    print(datas.toString());
-    print("THIS IS THE MAP");
-    print(
-        "${emailctrl.text.toString()} and ${emailctrl.text.length} is the email");
-    print("${passctrl.text.toString()} is the password");
 
-    var resoo = await http.post(Uri.parse(SIGN_IN_URL), body: datas);
-
-    String res = resoo.body.toString();
+    var reso = await http.post(Uri.parse(SIGN_IN_URL), body: data);
+    String res = reso.body.toString();
     // String res = json.decode(reso.data);
-    print(res);
-    print("IS THE RESULT OF SIGN IN ");
 
     if (res.toString().trim().contains("Dont have an account")) {
       _showSnackBar(context, "Account doesn't exist, Create a new account");
     } else {
-      if (res.toString().trim().contains("true")) {
+      if (res.toString().trim() == "true") {
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (BuildContext context) => AuthenticatedHomeScreen()),
