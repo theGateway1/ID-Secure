@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:zz_assetplus_flutter_mysql/constants/strings.dart';
 import 'package:zz_assetplus_flutter_mysql/services/firebase_methods.dart';
-
+import 'package:http/http.dart' as http;
 import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,7 +29,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Widget thisImageProb = null;
   GlobalKey key1;
   static int runstimes = 0;
-  Uint8List bytes1;
   Position thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
@@ -53,7 +54,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     task = null;
     thisImageProb = null;
     runstimes = 0;
-    bytes1 = null;
     image = null;
     imageUploaded = false;
     count = 0;
@@ -76,14 +76,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     if (pickedFile != null) {
       setState(() {
         image = File(pickedFile.path);
-        // _saveImage();
-        _fetchImageDetails().then((value) => getPng()
-            // .then(
-            //   (bytesHere) =>
-            //       //Get Png is returning null bytes.
-            //       uploadBytes(bytesHere),
-            // ),
-            );
+        _fetchImageDetails().then((value) => getPng());
       });
     }
   }
@@ -141,13 +134,12 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Future<Uint8List> getPng() async {
     //Get a proper PNG after 1 second
     setState(() {});
-    print("3 - Get PNG is running: Suspect");
+    print("3 - Get PNG is running");
     Timer(Duration(seconds: 1), () async {
       Uint8List bytes2 = null;
       bytes2 = await Utils().capture(key1);
       print(bytes2.toString());
       print("IS BYTES2");
-
       setState(() {
         thisImageProb = buildImage(bytes2);
       });
@@ -156,9 +148,8 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Widget buildImage(Uint8List sendMebytes) {
-    print(
-        "4 - Build Image is running before getting bytes or something: Suspect");
-    uploadBytes(sendMebytes);
+    print("4 - Build Image is running");
+    uploadBytes(sendMebytes).then((value) => _saveImage(sendMebytes));
     if (runBuildImageOnlyOnce < 2) {
       return sendMebytes != null
           ? Image.memory(sendMebytes)
@@ -257,43 +248,32 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  // _saveImage() async {
-  //   imageUploaded = false;
+  _saveImage(Uint8List bytesHere) async {
+    print("6 - Save Image is running");
+    imageUploaded = false;
 
-  //   print(
-  //       "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
+    var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
 
-  //   // _imgHasLocation = await getLocPermission();
-  //   // print("$_imgHasLocation -> THIS IS FINAL VALUE");
-  //   // if (_imgHasLocation == null) {
-  //   //   _imgHasLocation = await getLocPermission();
-  //   // }
+    request.fields["latitude"] = latitudeForStackedImage;
+    request.fields["longitude"] = longitudeForStackedImage;
+    request.fields["date"] = dateForStackedImage;
+    request.fields["time"] = timeForStackedImage;
+    request.fields["downurl"] = downUrl;
+    request.fields["image"] = downUrl;
 
-  //   var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
-
-  //   // request.fields["latitude"] =
-  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-  //   // request.fields["longitude"] =
-  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-  //   request.fields["date"] =
-  //       "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
-  //   request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
-
-  //   var pic = await http.MultipartFile.fromPath("image", image.path);
-  //   request.files.add(pic);
-
-  //   var response = await request.send();
-  //   if (response.statusCode == 200) {
-  //     print('image uploaded succesfully');
-  //     _showSnackBar(context, "Image Uploaded Successfully");
-  //     setState(() {
-  //       imageUploaded = true;
-  //     });
-  //   } else {
-  //     print(response.statusCode);
-  //     _showSnackBar(context, "Error Occured!");
-  //   }
-  // }
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print('image uploaded succesfully');
+      imageUploaded = true;
+      // _showSnackBar(context, "Image Uploaded Successfully");
+      // setState(() {
+      //   imageUploaded = true;
+      // });
+    } else {
+      print(response.statusCode);
+      print("error occured");
+    }
+  }
 
   @override
   void initState() {
