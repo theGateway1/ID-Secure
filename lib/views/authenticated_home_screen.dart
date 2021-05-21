@@ -382,7 +382,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                         child: Container(
                           color: Color.fromARGB(255, 227, 227, 220),
                           alignment: Alignment.center,
-                          height: 450,
+                          height: MediaQuery.of(context).size.height * 0.73,
                           padding: EdgeInsets.all(0),
                           child: Text(
                             "Pick an Image",
