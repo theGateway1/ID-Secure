@@ -8,9 +8,11 @@
 
  ## Usage
 - Sign up using name, email and password.
-- Click an image, it will get labelled with these attributes: date, time, coordinates and ID received from the backend.
+- Click an image,
+- It will become a widget and gets labelled with these attributes: date, time, coordinates.
+- The widget is converted to image using repaintBoundary.
 - The image is stored in Firebase storage, from where it receives a link.
-- The link with other label attributes gets stored on the backend.
+- The link with other label attributes gets stored on the backend, where it gets an auto generated ID.
 - Stored images can be viewed, with the label in view images screen, link received from firebase storage is used to load them on screen.
 
 ## Screenshots
