@@ -1,7 +1,7 @@
 # Image Database
 
 This branch
-- Works On: Localhost
+- Works On: Vultr Ubuntu Server
 - Authentication: Yes
 - Plugin: Image_picker
 - Reversed List: Yes
