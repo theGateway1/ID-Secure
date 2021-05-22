@@ -1,18 +1,14 @@
+import 'dart:async';
 import 'dart:io';
-
+import 'dart:typed_data';
+import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-// import 'package:flutter/services.dart';
-// import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-// import 'package:zz_assetplus_flutter_mysql/views/location.dart';
+import 'package:zz_assetplus_flutter_mysql/utils/utils.dart';
 import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
-import '../constants/strings.dart';
-import 'package:exif/exif.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
-// import 'package:geolocator/geolocator.dart';
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+import 'package:zz_assetplus_flutter_mysql/widgets/widget_to_img.dart';
+import '../widgets/widgets.dart';
 import 'package:intl/intl.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
@@ -22,6 +18,8 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 }
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
+  GlobalKey key1;
+  Uint8List bytes1;
   Position thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
@@ -33,49 +31,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Geolocator _geolocator = Geolocator();
   static int count = 0;
 
-  // Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
-  //   print('runs check');
-  //   Map<String, IfdTag> imgTags =
-  //       await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
-  //   print('this ran');
-  //   if (imgTags.containsKey('GPS GPSLongitude')) {
-  //     _imgHasLocation = true;
-  //     thisLoc = exifGPSToGeoFirePoint(imgTags);
-  //     return thisLoc;
-  //   } else {
-  //     print('Nope, no location');
-  //   }
-  // }
-
-  // GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
-  //   print('runs GeoFire');
-  //   final latitudeValue = tags['GPS GPSLatitude']
-  //       .values
-  //       .map<double>(
-  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-  //       .toList();
-  //   final latitudeSignal = tags['GPS GPSLatitudeRef'].printable;
-
-  //   final longitudeValue = tags['GPS GPSLongitude']
-  //       .values
-  //       .map<double>(
-  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-  //       .toList();
-  //   final longitudeSignal = tags['GPS GPSLongitudeRef'].printable;
-
-  //   double latitude =
-  //       latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
-
-  //   double longitude = longitudeValue[0] +
-  //       (longitudeValue[1] / 60) +
-  //       (longitudeValue[2] / 3600);
-
-  //   if (latitudeSignal == 'S') latitude = -latitude;
-  //   if (longitudeSignal == 'W') longitude = -longitude;
-
-  //   return GeoFirePoint(latitude, longitude);
-  // }
-
   _showSnackBar(BuildContext context, String message) {
     print('WORKS');
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
@@ -86,27 +41,23 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 
+  getPng() async {
+    final bytes1 = await Utils().capture(key1);
+    setState(() {
+      this.bytes1 = bytes1;
+    });
+  }
+
   Future<PickedFile> _clickImg() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         image = File(pickedFile.path);
-        _saveImage();
+        // _saveImage();
+        _fetchImageDetails();
       });
-      // Navigator.of(context).pop();
     }
   }
-
-  // _pickImg() async {
-  //   final pickedFile = await picker.getImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       image = File(pickedFile.path);
-  //       _saveImage();
-  //     });
-  //     // Navigator.of(context).pop();
-  //   }
-  // }
 
   Future<bool> getLocPermission() async {
     await Geolocator.requestPermission();
@@ -126,48 +77,71 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  _saveImage() async {
-    imageUploaded = false;
-
-    print(
-        "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
-    // imagePathForCheckGps =
-    //     await FlutterAbsolutePath.getAbsolutePath(image.path);
-    // thisLoc = await _checkGPSData(imagePathForCheckGps);
-
-    //
+  Future<Widget> _fetchImageDetails() async {
     _imgHasLocation = await getLocPermission();
     print("$_imgHasLocation -> THIS IS FINAL VALUE");
     if (_imgHasLocation == null) {
       _imgHasLocation = await getLocPermission();
     }
-
-    var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
-
-    request.fields["latitude"] =
+    String latitudeForStackedImage =
         _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-    request.fields["longitude"] =
+    String longitudeForStackedImage =
         _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-    print("THIS ALREADY DONE");
-    request.fields["date"] =
-        "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
-    request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
 
-    var pic = await http.MultipartFile.fromPath("image", image.path);
-    request.files.add(pic);
-
-    var response = await request.send();
-    if (response.statusCode == 200) {
-      print('image uploaded succesfully');
-      _showSnackBar(context, "Image Uploaded Successfully");
-      setState(() {
-        imageUploaded = true;
-      });
-    } else {
-      print(response.statusCode);
-      _showSnackBar(context, "Error Occured!");
-    }
+    String dateForStackedImage =
+        DateFormat.yMMMd().format(DateTime.now()).toString();
+    String timeForStackedImage =
+        DateFormat.Hm().format(DateTime.now()).toString();
+    return stackedImage(
+      image,
+      latitudeForStackedImage,
+      longitudeForStackedImage,
+      dateForStackedImage,
+      timeForStackedImage,
+    );
   }
+
+  Widget buildImage(Uint8List bytes) {
+    return bytes != null ? Image.memory(bytes) : Container();
+  }
+
+  // _saveImage() async {
+  //   imageUploaded = false;
+
+  //   print(
+  //       "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
+
+  //   // _imgHasLocation = await getLocPermission();
+  //   // print("$_imgHasLocation -> THIS IS FINAL VALUE");
+  //   // if (_imgHasLocation == null) {
+  //   //   _imgHasLocation = await getLocPermission();
+  //   // }
+
+  //   var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
+
+  //   // request.fields["latitude"] =
+  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+  //   // request.fields["longitude"] =
+  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+  //   request.fields["date"] =
+  //       "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
+  //   request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
+
+  //   var pic = await http.MultipartFile.fromPath("image", image.path);
+  //   request.files.add(pic);
+
+  //   var response = await request.send();
+  //   if (response.statusCode == 200) {
+  //     print('image uploaded succesfully');
+  //     _showSnackBar(context, "Image Uploaded Successfully");
+  //     setState(() {
+  //       imageUploaded = true;
+  //     });
+  //   } else {
+  //     print(response.statusCode);
+  //     _showSnackBar(context, "Error Occured!");
+  //   }
+  // }
 
   @override
   void initState() {
@@ -176,71 +150,107 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: const Text('Image Upload'),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.camera),
-                      label: Text(
-                        "Pick an image",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      onPressed: () {
-                        _clickImg();
-                      },
+    return Scaffold(
+      backgroundColor: Colors.white,
+      // Color.fromARGB(1, 238, 254, 257),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: const Text('Image Upload'),
+      ),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.camera),
+                    label: Text(
+                      "Pick an image",
+                      style: TextStyle(fontSize: 19),
                     ),
-                  ],
-                ),
-                image != null
-                    ? Container(
-                        padding: EdgeInsets.all(18),
-                        child: Image.file(image),
-                      )
-                    : Container(
-                        // height: MediaQuery.of(context).size.height * 0.5,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Pick an image',
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                imageUploaded == true
-                    ? Container(
-                        // height: MediaQuery.of(context).size.height * 0.5,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Image Uploaded Successfully',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ))
-                    : Container(),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton(
-                    child: Text("View Uploaded Images"),
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => ViewImages()),
+                      _clickImg().then(
+                        (value) => Timer(
+                          Duration(seconds: 3),
+                          () {
+                            setState(() {
+                              getPng();
+                            });
+                          },
+                        ),
                       );
                     },
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+              image != null
+                  ? WidgetToImage(
+                      builder: (key) {
+                        this.key1 = key;
+                        return Container(
+                          padding: EdgeInsets.all(18),
+                          child: FutureBuilder(
+                            future: _fetchImageDetails(),
+                            builder: (context, snapshot) {
+                              return snapshot.hasData
+                                  ? snapshot.data
+                                  : Text('Loading');
+                            },
+                          ),
+
+                          //  Image.file(image),
+                        );
+                      },
+                    )
+                  : Container(
+                      // height: MediaQuery.of(context).size.height * 0.5,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Pick an image',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+              buildImage(bytes1),
+              imageUploaded == true
+                  ? Container(
+                      // height: MediaQuery.of(context).size.height * 0.5,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Image Uploaded Successfully',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ))
+                  : Container(),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton(
+                      child: Text("View Uploaded Images"),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => ViewImages()),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton(
+                        child: Text("Get PNG"),
+                        onPressed: () {
+                          getPng();
+                        }),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
