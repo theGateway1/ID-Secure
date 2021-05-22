@@ -125,7 +125,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (res.toString().trim().contains("Dont have an account")) {
       _showSnackBar(context, "Account doesn't exist, Create a new account");
     } else {
-      if (res.toString().trim() == "true") {
+      if (res.toString().trim().contains("true")) {
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (BuildContext context) => AuthenticatedHomeScreen()),

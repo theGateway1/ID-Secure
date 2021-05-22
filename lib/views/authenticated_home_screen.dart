@@ -179,7 +179,7 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     if (thisbytes == null) {
       print("null returned");
     }
-    final destination = 'files/';
+    final destination = 'files/${DateTime.now().toString()}';
     task = FirebaseAPI.uploadBytes(destination, thisbytes);
 
 // This setstate has been upgraded with setstate(){} in getpngg
