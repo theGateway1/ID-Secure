@@ -129,6 +129,7 @@ class _ViewImagesState extends State<ViewImages> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
+
                       DividerHere(),
                     ],
                   ),
