@@ -82,9 +82,9 @@ class _SignInScreenState extends State<SignInScreen> {
     print("is the email");
 
     var data = {
-      "email": emailctrl.text.toString(),
-      "name": namectrl.text.toString(),
-      "pass": passctrl.text.toString(),
+      "email": emailctrl.text.toString().trim(),
+      "name": namectrl.text.toString().trim(),
+      "pass": passctrl.text.toString().trim(),
     };
 
     var reso = await http.post(Uri.parse(SIGN_UP_URL), body: data);
@@ -114,8 +114,8 @@ class _SignInScreenState extends State<SignInScreen> {
     });
 
     var data = {
-      "email": emailctrl.text,
-      "pass": passctrl.text,
+      "email": emailctrl.text.toString().trim(),
+      "pass": passctrl.text.toString().trim(),
     };
 
     var reso = await http.post(Uri.parse(SIGN_IN_URL), body: data);

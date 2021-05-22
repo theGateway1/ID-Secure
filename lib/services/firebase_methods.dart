@@ -11,11 +11,11 @@ class FirebaseAPI {
       }
       print("It came here");
       // if (urlCount < 1) {
-
       final ref = FirebaseStorage.instance.ref(destination);
       return ref.putData(bytes);
-      // } //Figure out else part probably to return something in uploadTask other than waiting connectionstate
-
+      // } else {
+      //   print("Requested Denied due to more than 1 usage");
+      // }
     } on FirebaseException catch (e) {
       print(e.code);
       print(e.toString());

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zz_assetplus_flutter_mysql/widgets/widgets.dart';
 import '../constants/strings.dart';
 
@@ -26,6 +28,14 @@ class _ViewImagesState extends State<ViewImages> {
     }
   }
 
+  Future<void> _onOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      await launch(link.url);
+    } else {
+      throw 'Could not launch $link';
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -39,17 +49,7 @@ class _ViewImagesState extends State<ViewImages> {
       appBar: AppBar(
         title: Text('Images'),
       ),
-      body:
-          // responseList.isNotEmpty
-          //     ? Center(
-          //         child: Text(
-          //           'Start Uploading images to the database.',
-          //           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          //           textAlign: TextAlign.center,
-          //         ),
-          //       )
-          //     :
-          FutureBuilder<List>(
+      body: FutureBuilder<List>(
         future: getImages(),
         builder: (context, snapshot) {
           return ListView.builder(
@@ -59,14 +59,14 @@ class _ViewImagesState extends State<ViewImages> {
               reversedList = receivedList.reversed.toList();
               return SingleChildScrollView(
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  padding: EdgeInsets.fromLTRB(6, 12, 6, 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "ID: ${reversedList[index]['id']}",
                         style: TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                            fontSize: 17, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
@@ -74,7 +74,7 @@ class _ViewImagesState extends State<ViewImages> {
                       SelectableText(
                         "Latitude: ${reversedList[index]['latitude']}",
                         style: TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                            fontSize: 17, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
@@ -82,7 +82,7 @@ class _ViewImagesState extends State<ViewImages> {
                       SelectableText(
                         "Longitude: ${reversedList[index]['longitude']}",
                         style: TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                            fontSize: 17, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
@@ -90,7 +90,7 @@ class _ViewImagesState extends State<ViewImages> {
                       SelectableText(
                         "Date: ${reversedList[index]['date']}",
                         style: TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                            fontSize: 17, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
@@ -98,14 +98,34 @@ class _ViewImagesState extends State<ViewImages> {
                       SelectableText(
                         "Time: ${reversedList[index]['time']}",
                         style: TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                            fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.016,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Image Url: ',
+                            style: TextStyle(
+                                fontSize: 17, fontWeight: FontWeight.bold),
+                          ),
+                          Linkify(
+                            onOpen: _onOpen,
+                            text: "${reversedList[index]["downurl"]}",
+                            overflow: TextOverflow.ellipsis,
+                            options: LinkifyOptions(humanize: false),
+                            style:
+                                imageUrlStyle(Colors.blue, FontWeight.normal),
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),
                       Container(
                           child: Image.network(
-                              "$IMAGE_URL/${reversedList[index]["image"]}")),
+                              "${reversedList[index]["downurl"]}")),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.016,
                       ),

@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:zz_assetplus_flutter_mysql/constants/strings.dart';
 import 'package:zz_assetplus_flutter_mysql/services/firebase_methods.dart';
-
+import 'package:http/http.dart' as http;
 import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,7 +17,6 @@ import '../widgets/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:async/async.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
   @override
@@ -28,7 +29,6 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   Widget thisImageProb = null;
   GlobalKey key1;
   static int runstimes = 0;
-  Uint8List bytes1;
   Position thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
@@ -43,50 +43,104 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   String downUrl = "";
   Widget thisWasCardWidget = null;
   String loadingString = "LOADING WIDGET";
-  AsyncMemoizer _memoizer;
   int isReturningImage = 0;
+  String latitudeForStackedImage = "null";
+  String longitudeForStackedImage = "null";
+  String dateForStackedImage = "null";
+  String timeForStackedImage = "null";
+  static int runBuildImageOnlyOnce = 0;
+  String dbUploadProgress = "Database Upload Progress ";
 
   setNullAgain() {
     task = null;
     thisImageProb = null;
     runstimes = 0;
-    bytes1 = null;
     image = null;
     imageUploaded = false;
     count = 0;
-
+    isReturningImage = 0;
     urlcount = 0;
     downUrl = "";
     thisWasCardWidget = null;
     loadingString = "LOADING WIDGET";
-    isReturningImage = 0;
+    latitudeForStackedImage = "null";
+    longitudeForStackedImage = "null";
+    dateForStackedImage = "null";
+    timeForStackedImage = "null";
+    runBuildImageOnlyOnce = 0;
   }
 
-  Stream<Uint8List> lookAtReturningWidget() {
-    if (isReturningImage == 1) {
-      getPng();
+  Future<PickedFile> _clickImg() async {
+    print("1 - Click Image is running");
+    setNullAgain();
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        image = File(pickedFile.path);
+        _fetchImageDetails().then((value) => getPng());
+      });
     }
   }
 
-  thisStreamBuilder() => StreamBuilder<Uint8List>(
-        stream: lookAtReturningWidget(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return buildImage(snapshot.data);
-          }
-          return Text("I don't have data");
-        },
-      );
+  Future<Widget> _fetchImageDetails() async {
+    runstimes++;
+    _imgHasLocation = await getLocPermission();
+
+    if (_imgHasLocation == null) {
+      _imgHasLocation = await getLocPermission();
+    }
+    latitudeForStackedImage =
+        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+    longitudeForStackedImage =
+        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+
+    dateForStackedImage = DateFormat.yMMMd().format(DateTime.now()).toString();
+    timeForStackedImage = DateFormat.Hm().format(DateTime.now()).toString();
+
+    print("2- Fetch Image is running");
+
+    return Container();
+
+    //Fetch image doesn't need to return this widget, as stacked image is set as future in future builder.
+    // stackedImage(
+    //   image,
+    //   latitudeForStackedImage,
+    //   longitudeForStackedImage,
+    //   dateForStackedImage,
+    //   timeForStackedImage,
+    //   runstimes,
+    // );
+  }
+
+  Future<bool> getLocPermission() async {
+    await Geolocator.requestPermission();
+    count++;
+
+    print("permission asked $count times for location");
+    LocationPermission status = await Geolocator.checkPermission();
+    print(status);
+    if (status == LocationPermission.always) {
+      thisLoc = await Geolocator.getCurrentPosition();
+      return true;
+    } else if ((status == LocationPermission.denied ||
+            status == LocationPermission.deniedForever) &&
+        count < 1) {
+      getLocPermission();
+    } else {
+      print("returning false");
+      return false;
+    }
+  }
 
   Future<Uint8List> getPng() async {
-    //Get a proper PNG after 5 seconds
-    print("3 - Get PNG is running: Suspect");
-    Timer(Duration(seconds: 5), () async {
+    //Get a proper PNG after 1 second
+    setState(() {});
+    print("3 - Get PNG is running");
+    Timer(Duration(seconds: 1), () async {
       Uint8List bytes2 = null;
-      bytes2 = await Utils().capture(key1); //TODO: Was final instead of var
+      bytes2 = await Utils().capture(key1);
       print(bytes2.toString());
       print("IS BYTES2");
-
       setState(() {
         thisImageProb = buildImage(bytes2);
       });
@@ -95,41 +149,41 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
   }
 
   Widget buildImage(Uint8List sendMebytes) {
-    print(
-        "4 - Build Image is running before getting bytes or something: Suspect");
-    return sendMebytes != null
-        ? Image.memory(sendMebytes)
-        : Container(
-            child: image == null
-                ? Text(
-                    "Select an image",
-                    style: columnElementTextStyle(),
-                  )
-                : downUrl.contains("firebasestorage")
-                    ? Text(
-                        "Upload Successful",
-                        style: columnElementTextStyle(),
-                      )
-                    : Text(
-                        'Loading image file',
-                        style: columnElementTextStyle(),
-                      ));
-    //  image != null
-    //     ? Container(
-    //         child: Text("IMAGE NOT FOUND"),
-    //       )
-    //     // ? Container()
-    //     : Container();
+    print("4 - Build Image is running");
+    uploadBytes(sendMebytes).then((value) => _saveImage(sendMebytes));
+    if (runBuildImageOnlyOnce < 2) {
+      return sendMebytes != null
+          ? Container()
+          // Image.memory(sendMebytes)
+          : Container(
+              child: image == null
+                  ? Text(
+                      "Select an image",
+                      style: columnElementTextStyle(),
+                    )
+                  : downUrl.contains("firebasestorage")
+                      ? Text(
+                          "Upload Successful",
+                          style: columnElementTextStyle(),
+                        )
+                      : Text(
+                          'Loading image file',
+                          style: columnElementTextStyle(),
+                        ),
+            );
+    }
   }
 
   Future uploadBytes(Uint8List thisbytes) async {
+    print("5 - The upload step");
     if (thisbytes == null) {
-      print("null ret");
+      print("null returned");
     }
     final destination = 'files/';
     task = FirebaseAPI.uploadBytes(destination, thisbytes);
 
-    setState(() {});
+// This setstate has been upgraded with setstate(){} in getpngg
+    setState(() {}); //Still this is necessary to know the upload progress
     if (task == null) {
       print("Task is null");
       return;
@@ -173,16 +227,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
 
           return Container(
             child: Text(
-              'Progress: ${percentage.toString()}',
-              style: columnElementTextStyle(),
+              'Progress: ${percentage.toStringAsFixed(2)}%',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
           );
         } else {
           print("IT IS EMPTY IN WIDGET");
           return Container(
-              // child:
-              // Text('EMPTY EMPTY EMPTY'),
-              );
+            child: Text(
+              'Progress: ',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          );
         }
       });
 
@@ -194,58 +250,37 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     }
   }
 
-  // void anyHowGetPng() {
-  //   if (loadingString != "Loading") {
-  //     print("IT EVEN RUNS");
-  //     getPng();
-  //   } else {
-  //     Timer(Duration(seconds: 10), () {
-  //       anyHowGetPng();
-  //     });
-  //   }
-  // }
-  // _saveImage() async {
-  //   imageUploaded = false;
+  _saveImage(Uint8List bytesHere) async {
+    print("6 - Save Image is running");
 
-  //   print(
-  //       "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
+    imageUploaded = false;
 
-  //   // _imgHasLocation = await getLocPermission();
-  //   // print("$_imgHasLocation -> THIS IS FINAL VALUE");
-  //   // if (_imgHasLocation == null) {
-  //   //   _imgHasLocation = await getLocPermission();
-  //   // }
+    var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
 
-  //   var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
+    request.fields["latitude"] = latitudeForStackedImage;
+    request.fields["longitude"] = longitudeForStackedImage;
+    request.fields["date"] = dateForStackedImage;
+    request.fields["time"] = timeForStackedImage;
+    request.fields["downurl"] = downUrl;
+    request.fields["image"] = downUrl;
 
-  //   // request.fields["latitude"] =
-  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
-  //   // request.fields["longitude"] =
-  //   //     _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
-  //   request.fields["date"] =
-  //       "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
-  //   request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
-
-  //   var pic = await http.MultipartFile.fromPath("image", image.path);
-  //   request.files.add(pic);
-
-  //   var response = await request.send();
-  //   if (response.statusCode == 200) {
-  //     print('image uploaded succesfully');
-  //     _showSnackBar(context, "Image Uploaded Successfully");
-  //     setState(() {
-  //       imageUploaded = true;
-  //     });
-  //   } else {
-  //     print(response.statusCode);
-  //     _showSnackBar(context, "Error Occured!");
-  //   }
-  // }
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print('image uploaded succesfully');
+      imageUploaded = true;
+      // _showSnackBar(context, "Image Uploaded Successfully");
+      setState(() {
+        imageUploaded = true;
+      });
+    } else {
+      print(response.statusCode);
+      print("error occured");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _memoizer = AsyncMemoizer();
     getLocPermission();
   }
 
@@ -265,16 +300,18 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  icon: Icon(Icons.camera),
-                  label: Text(
-                    "Pick an image",
-                    style: TextStyle(fontSize: 19),
-                  ),
-                  onPressed: () {
-                    _clickImg();
-                  },
-                ),
+                image != null
+                    ? ElevatedButton.icon(
+                        icon: Icon(Icons.camera),
+                        label: Text(
+                          "Pick an image",
+                          style: TextStyle(fontSize: 19),
+                        ),
+                        onPressed: () {
+                          _clickImg();
+                        },
+                      )
+                    : Container(),
               ],
             ),
             Container(
@@ -288,13 +325,21 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // task != null ? buildUploadStatus(task) : Container(),
+                          task != null
+                              ? buildUploadStatus(task)
+                              : Text(
+                                  'Progress: ',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                          DividerHere(),
                           Text(
                             image == null
                                 ? "Pick an image"
                                 : downUrl.contains("firebasestorage")
                                     ? "Image URL:"
-                                    : "Fetching",
+                                    : "Waiting for Upload to complete",
                             style: image == null
                                 ? TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold)
@@ -314,14 +359,36 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                                       Colors.blue, FontWeight.normal),
                                 )
                               : Container(),
+                          imageUploaded == true
+                              ? Column(
+                                  children: [
+                                    DividerHere(),
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "Upload to database successful",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ))
+                                  ],
+                                )
+                              : Container()
+                          // : Container(),
                         ],
                       )
-                    : Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Pick an image",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                    : InkWell(
+                        onTap: _clickImg,
+                        child: Container(
+                          color: Color.fromARGB(255, 227, 227, 220),
+                          alignment: Alignment.center,
+                          height: MediaQuery.of(context).size.height * 0.73,
+                          padding: EdgeInsets.all(0),
+                          child: Text(
+                            "Pick an Image",
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
               ),
@@ -332,9 +399,17 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                     builder: (key) {
                       this.key1 = key;
                       return Container(
-                        padding: EdgeInsets.all(15),
+                        padding: EdgeInsets.fromLTRB(15, 15, 15, 2),
                         child: FutureBuilder<Widget>(
-                            future: _fetchImageDetails(),
+                            future: stackedImage(
+                              //Major Change: Instead of fetchimage, use stacked image widget by converting it to future<Widget>
+                              image,
+                              latitudeForStackedImage,
+                              longitudeForStackedImage,
+                              dateForStackedImage,
+                              timeForStackedImage,
+                              // runstimes,
+                            ),
                             builder: (context, snapshot) {
                               if (snapshot.hasData &&
                                   (snapshot.connectionState ==
@@ -357,27 +432,27 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.start,
             //   children: [
-            Container(
-              color: Colors.red,
-              width: 300,
-              height: 300,
-              child: thisImageProb == null ? Text("WOHOHOHOH") : thisImageProb,
-            ),
-            // ],
+            // Container(
+            //   color: Colors.white,
+            //   width: MediaQuery.of(context).size.width * 0.9,
+            //   height: thisImageProb == null ? 40 : 600,
+            //   child: thisImageProb == null
+            //       ? Center(child: Text(""))
+            //       : thisImageProb,
             // ),
-            imageUploaded == true
-                ? Container(
-                    // height: MediaQuery.of(context).size.height * 0.5,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Image Uploaded Successfully',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ))
-                : Container(),
+
+            // imageUploaded == true
+            //     ? Container(
+            //         alignment: Alignment.center,
+            //         child: Text(
+            //           'Image Uploaded Successfully',
+            //           style:
+            //               TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            //         ))
+            //     : Container(),
 
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 child: Text("View Uploaded Images"),
                 onPressed: () {
@@ -388,46 +463,9 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
                 },
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(12.0),
-            //   child: ElevatedButton(
-            //       child: Text("Get PNG"),
-            //       onPressed: () {
-            //         uploadBytes();
-            //       }),
-            // ),
           ],
         ),
       ),
     );
   }
 }
-
-//Modal Bottom Sheet
-// showModalBottomSheet(
-//   // enableDrag: true,
-//   // elevation: 20,
-
-//   isScrollControlled: true,
-//   context: context,
-//   builder: (context) => Padding(
-//     padding: EdgeInsets.symmetric(vertical: 15),
-//     child: Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//       children: [
-//         IconButton(
-//           icon: Icon(Icons.image),
-//           iconSize: 33,
-//           color: Theme.of(context).primaryColor,
-//           onPressed: _pickImg,
-//         ),
-//         IconButton(
-//           icon: Icon(Icons.camera),
-//           iconSize: 33,
-//           color: Theme.of(context).primaryColor,
-//           onPressed: _clickImg,
-//         ),
-//       ],
-//     ),
-//   ),
-// );

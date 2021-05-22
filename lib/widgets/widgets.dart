@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 
 Widget DividerHere() {
   return Text(
-    '________________________________________________________________________________________',
+    '───────────────────────────────────────────────────────────────────────────────────────',
+    // '---------------------------------------------------------------------------------',
     softWrap: false,
     overflow: TextOverflow.clip,
     style: TextStyle(
@@ -22,8 +23,9 @@ TextStyle columnElementTextStyle() {
       fontSize: 15, color: Colors.black, fontWeight: FontWeight.w500);
 }
 
-Widget stackedImageNotModel(
-    File image, String latitude, String longitude, String date, String time) {
+Future<Widget> stackedImage(File image, String latitude, String longitude,
+    String date, String time) async {
+  await Future.delayed(Duration(microseconds: 2));
   return Container(
     decoration: BoxDecoration(
         color: Color.fromARGB(255, 227, 227, 220),
@@ -52,10 +54,10 @@ Widget stackedImageNotModel(
                 'Time: $time',
                 style: columnElementTextStyle(),
               ),
-              SelectableText(
-                'Count: $count',
-                style: columnElementTextStyle(),
-              ),
+              // SelectableText(
+              //   'Count: $count',
+              //   style: columnElementTextStyle(),
+              // ),
             ],
           ),
         ),
