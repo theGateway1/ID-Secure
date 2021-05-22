@@ -8,7 +8,7 @@
 
  ## Usage
 - Sign up using name, email and password.
-- Click an image,
+- Click an image using device camera.
 - It will become a widget and gets labelled with these attributes: date, time, coordinates.
 - The widget is converted to image using repaintBoundary.
 - The image is stored in Firebase storage, from where it receives a link.
