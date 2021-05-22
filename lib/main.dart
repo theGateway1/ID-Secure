@@ -1,9 +1,21 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:zz_assetplus_flutter_mysql/views/authenticated_home_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:zz_assetplus_flutter_mysql/views/authenticated_home_screen.dart';
+import 'package:zz_assetplus_flutter_mysql/views/signin_screen.dart';
 
 void main() {
   runApp(MyApp());
+  HttpOverrides.global = new MyHttpOverrides();
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -28,6 +40,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
+      // home: SignInScreen(),
       home: AuthenticatedHomeScreen(),
     );
   }

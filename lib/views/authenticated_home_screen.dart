@@ -1,15 +1,19 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:dio/dio.dart';
+import 'package:geolocator/geolocator.dart';
+// import 'package:flutter/services.dart';
+// import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+// import 'package:zz_assetplus_flutter_mysql/views/location.dart';
 import 'package:zz_assetplus_flutter_mysql/views/view_images.dart';
 import '../constants/strings.dart';
 import 'package:exif/exif.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+// import 'package:geolocator/geolocator.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+import 'package:intl/intl.dart';
 
 class AuthenticatedHomeScreen extends StatefulWidget {
   @override
@@ -18,159 +22,156 @@ class AuthenticatedHomeScreen extends StatefulWidget {
 }
 
 class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
-  List<Asset> images = <Asset>[];
-  var dio = Dio();
-  GeoFirePoint thisLoc;
+  Position thisLoc;
   bool _imgHasLocation = false;
   String imagePathForCheckGps = "null";
+  File image;
+  final picker = ImagePicker();
   GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey(); //Key to get context to show snackbar;
+  bool imageUploaded = false;
+  Geolocator _geolocator = Geolocator();
+  static int count = 0;
 
-  Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
-    print('runs check');
-    Map<String, IfdTag> imgTags =
-        await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
-    print('this ran');
-    if (imgTags.containsKey('GPS GPSLongitude')) {
-      _imgHasLocation = true;
-      thisLoc = exifGPSToGeoFirePoint(imgTags);
-      return thisLoc;
-    } else {
-      print('Nope, no location');
+  // Future<GeoFirePoint> _checkGPSData(String imageForCheckGps) async {
+  //   print('runs check');
+  //   Map<String, IfdTag> imgTags =
+  //       await readExifFromBytes(File(imageForCheckGps).readAsBytesSync());
+  //   print('this ran');
+  //   if (imgTags.containsKey('GPS GPSLongitude')) {
+  //     _imgHasLocation = true;
+  //     thisLoc = exifGPSToGeoFirePoint(imgTags);
+  //     return thisLoc;
+  //   } else {
+  //     print('Nope, no location');
+  //   }
+  // }
+
+  // GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
+  //   print('runs GeoFire');
+  //   final latitudeValue = tags['GPS GPSLatitude']
+  //       .values
+  //       .map<double>(
+  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
+  //       .toList();
+  //   final latitudeSignal = tags['GPS GPSLatitudeRef'].printable;
+
+  //   final longitudeValue = tags['GPS GPSLongitude']
+  //       .values
+  //       .map<double>(
+  //           (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
+  //       .toList();
+  //   final longitudeSignal = tags['GPS GPSLongitudeRef'].printable;
+
+  //   double latitude =
+  //       latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
+
+  //   double longitude = longitudeValue[0] +
+  //       (longitudeValue[1] / 60) +
+  //       (longitudeValue[2] / 3600);
+
+  //   if (latitudeSignal == 'S') latitude = -latitude;
+  //   if (longitudeSignal == 'W') longitude = -longitude;
+
+  //   return GeoFirePoint(latitude, longitude);
+  // }
+
+  _showSnackBar(BuildContext context, String message) {
+    print('WORKS');
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
+  Future<PickedFile> _clickImg() async {
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        image = File(pickedFile.path);
+        _saveImage();
+      });
+      // Navigator.of(context).pop();
     }
   }
 
-  // _showSnackBar(BuildContext context, String message) {
-  //   print('WORKS');
-  //   // ScaffoldMessenger.of(context).removeCurrentSnackBar();
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //     ),
-  //   );
+  // _pickImg() async {
+  //   final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       image = File(pickedFile.path);
+  //       _saveImage();
+  //     });
+  //     // Navigator.of(context).pop();
+  //   }
   // }
 
-  GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
-    print('runs GeoFire');
-    final latitudeValue = tags['GPS GPSLatitude']
-        .values
-        .map<double>(
-            (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-        .toList();
-    final latitudeSignal = tags['GPS GPSLatitudeRef'].printable;
-
-    final longitudeValue = tags['GPS GPSLongitude']
-        .values
-        .map<double>(
-            (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
-        .toList();
-    final longitudeSignal = tags['GPS GPSLongitudeRef'].printable;
-
-    double latitude =
-        latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
-
-    double longitude = longitudeValue[0] +
-        (longitudeValue[1] / 60) +
-        (longitudeValue[2] / 3600);
-
-    if (latitudeSignal == 'S') latitude = -latitude;
-    if (longitudeSignal == 'W') longitude = -longitude;
-
-    return GeoFirePoint(latitude, longitude);
+  Future<bool> getLocPermission() async {
+    await Geolocator.requestPermission();
+    count++;
+    LocationPermission status = await Geolocator.checkPermission();
+    print(status);
+    if (status == LocationPermission.always) {
+      thisLoc = await Geolocator.getCurrentPosition();
+      return true;
+    } else if ((status == LocationPermission.denied ||
+            status == LocationPermission.deniedForever) &&
+        count < 2) {
+      getLocPermission();
+    } else {
+      print("returning false");
+      return false;
+    }
   }
 
-  _saveImages() async {
-    if (images != null) {
-      for (var i = 0; i < images.length; i++) {
-        _imgHasLocation = false;
-        ByteData byteData = await images[i].getByteData();
-        List<int> imageData = byteData.buffer.asInt8List();
+  _saveImage() async {
+    imageUploaded = false;
 
-        MultipartFile multipartFile = MultipartFile.fromBytes(
-          imageData,
-          filename: images[i].name,
-          contentType: MediaType('image', 'jpg'),
-        );
-        imagePathForCheckGps =
-            await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
-        thisLoc = await _checkGPSData(imagePathForCheckGps);
+    print(
+        "The date is ${DateFormat.yMMMd().format(DateTime.now()).toString()}");
+    // imagePathForCheckGps =
+    //     await FlutterAbsolutePath.getAbsolutePath(image.path);
+    // thisLoc = await _checkGPSData(imagePathForCheckGps);
 
-        FormData formdata = FormData.fromMap(
-          {
-            "image": multipartFile,
-            "latitude": _imgHasLocation == false
-                ? "Not Found"
-                : thisLoc.latitude.toString(),
-            "longitude": _imgHasLocation == false
-                ? "Not Found"
-                : thisLoc.longitude.toString(),
-          },
-        );
+    //
+    _imgHasLocation = await getLocPermission();
+    print("$_imgHasLocation -> THIS IS FINAL VALUE");
+    if (_imgHasLocation == null) {
+      _imgHasLocation = await getLocPermission();
+    }
 
-        var response = await dio.post(UPLOAD_URL, data: formdata);
-        if (response.statusCode == 200) {
-          print(response.data);
-          // _showSnackBar(context, "Image Uploaded Successfully");
-        } else {
-          print(response.data);
-          // _showSnackBar(context, "Error Occured!");
-        }
-      }
+    var request = http.MultipartRequest('POST', Uri.parse(UPLOAD_URL));
+
+    request.fields["latitude"] =
+        _imgHasLocation == false ? "Not Found" : thisLoc.latitude.toString();
+    request.fields["longitude"] =
+        _imgHasLocation == false ? "Not Found" : thisLoc.longitude.toString();
+    print("THIS ALREADY DONE");
+    request.fields["date"] =
+        "${DateFormat.yMMMd().format(DateTime.now()).toString()}";
+    request.fields["time"] = DateFormat.Hm().format(DateTime.now()).toString();
+
+    var pic = await http.MultipartFile.fromPath("image", image.path);
+    request.files.add(pic);
+
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print('image uploaded succesfully');
+      _showSnackBar(context, "Image Uploaded Successfully");
+      setState(() {
+        imageUploaded = true;
+      });
+    } else {
+      print(response.statusCode);
+      _showSnackBar(context, "Error Occured!");
     }
   }
 
   @override
   void initState() {
     super.initState();
-  }
-
-  Widget buildGridView() {
-    return GridView.count(
-      crossAxisCount: 1,
-      padding: EdgeInsets.all(15),
-      mainAxisSpacing: 10,
-      children: List.generate(images.length, (index) {
-        Asset asset = images[index];
-        print("1. ${images[index].identifier}, 2. ${images[index].name}");
-        return AssetThumb(
-          asset: asset,
-          width: 300,
-          height: 300,
-        );
-      }),
-    );
-  }
-
-  Future<void> loadAssets() async {
-    List<Asset> resultList = <Asset>[];
-    String error = 'None';
-
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 300,
-        enableCamera: true,
-        selectedAssets: images,
-        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
-        materialOptions: MaterialOptions(
-          // actionBarColor: "#abcdef",
-          actionBarTitle: "Pick Images",
-          allViewTitle: "All Photos",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      images = resultList;
-    });
   }
 
   @override
@@ -183,36 +184,58 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
         ),
         body: SingleChildScrollView(
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.89,
+            height: MediaQuery.of(context).size.height,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Row(
-                  mainAxisAlignment: images.isNotEmpty
-                      ? MainAxisAlignment.spaceAround
-                      : MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      child: Text("Pick images"),
-                      onPressed: loadAssets,
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.camera),
+                      label: Text(
+                        "Pick an image",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      onPressed: () {
+                        _clickImg();
+                      },
                     ),
-                    images.isNotEmpty
-                        ? ElevatedButton(
-                            child: Text("Upload Images"),
-                            onPressed: _saveImages,
-                          )
-                        : Container(),
                   ],
                 ),
-                Expanded(
-                  child: buildGridView(),
-                ),
+                image != null
+                    ? Container(
+                        padding: EdgeInsets.all(18),
+                        child: Image.file(image),
+                      )
+                    : Container(
+                        // height: MediaQuery.of(context).size.height * 0.5,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Pick an image',
+                          style: TextStyle(
+                              fontSize: 30, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                imageUploaded == true
+                    ? Container(
+                        // height: MediaQuery.of(context).size.height * 0.5,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Image Uploaded Successfully',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ))
+                    : Container(),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
                     child: Text("View Uploaded Images"),
                     onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => ViewImages()));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => ViewImages()),
+                      );
                     },
                   ),
                 ),
@@ -224,3 +247,32 @@ class _AuthenticatedHomeScreenState extends State<AuthenticatedHomeScreen> {
     );
   }
 }
+
+//Modal Bottom Sheet
+// showModalBottomSheet(
+//   // enableDrag: true,
+//   // elevation: 20,
+
+//   isScrollControlled: true,
+//   context: context,
+//   builder: (context) => Padding(
+//     padding: EdgeInsets.symmetric(vertical: 15),
+//     child: Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//       children: [
+//         IconButton(
+//           icon: Icon(Icons.image),
+//           iconSize: 33,
+//           color: Theme.of(context).primaryColor,
+//           onPressed: _pickImg,
+//         ),
+//         IconButton(
+//           icon: Icon(Icons.camera),
+//           iconSize: 33,
+//           color: Theme.of(context).primaryColor,
+//           onPressed: _clickImg,
+//         ),
+//       ],
+//     ),
+//   ),
+// );
