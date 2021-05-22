@@ -13,12 +13,16 @@ Widget DividerHere() {
   );
 }
 
+TextStyle imageUrlStyle(Color color, FontWeight fontweight) {
+  return TextStyle(fontSize: 15, color: color, fontWeight: fontweight);
+}
+
 TextStyle columnElementTextStyle() {
   return TextStyle(
       fontSize: 15, color: Colors.black, fontWeight: FontWeight.w500);
 }
 
-Widget stackedImage(
+Widget stackedImageNotModel(
     File image, String latitude, String longitude, String date, String time) {
   return Container(
     decoration: BoxDecoration(
@@ -48,6 +52,10 @@ Widget stackedImage(
                 'Time: $time',
                 style: columnElementTextStyle(),
               ),
+              SelectableText(
+                'Count: $count',
+                style: columnElementTextStyle(),
+              ),
             ],
           ),
         ),
@@ -56,6 +64,7 @@ Widget stackedImage(
     ),
   );
 }
+
 
 
 // child: Stack(
