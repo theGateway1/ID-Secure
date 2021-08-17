@@ -1,7 +1,7 @@
 # Image Database
 
 ## Specifications
-- Backend: PHP, MySQL Database
+- Backend: PHP, MySQL
 - Frontend: Flutter
 - Server OS: Ubuntu 18.04 x64 (VPS: Digital Ocean)
 - Hosted At: http://143.244.129.37/
