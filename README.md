@@ -3,8 +3,8 @@
 ## Specifications
 - Backend: PHP, MySQL Database
 - Frontend: Flutter
-- Server OS: Ubuntu 18.04 x64 (VPS: Vultr)
-- Hosted At: http://198.13.42.185/
+- Server OS: Ubuntu 18.04 x64 (VPS: Digital Ocean)
+- Hosted At: http://143.244.129.37/
 
 ## APK File
 Download the APK file: [APK.zip](https://github.com/codedog001/flutter_MySQL_app/files/6526297/APK.zip)
