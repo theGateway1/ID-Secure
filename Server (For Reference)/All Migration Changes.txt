@@ -1,0 +1,8 @@
+1. Install Lamp Stack in the server.
+2. Install PHPMYADMIN in server.
+3. Create database - withgpsuserdata, and 2 tables - userdata and mytable.
+    userdata columns - id, image, latitude, longitude, date, time, downurl
+    mytable columns - id, name, email, pass
+4. Transfer all the files to server in /var/www/html directory using filezilla.
+5. Now, in the flutter app change Url in constant/string to new ip address of server.
+6. If getting connection error, try changing the username field and don't ever keep it root, it is not allowed, use the new user created.

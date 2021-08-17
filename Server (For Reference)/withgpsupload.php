@@ -1,5 +1,5 @@
 <?php
-$db = mysqli_connect('localhost','root','12345678','withgpsuserdata');
+$db = mysqli_connect('localhost','mohit','12345678','withgpsuserdata');
 if(mysqli_connect_error())
 {
     echo "Connection Error.";

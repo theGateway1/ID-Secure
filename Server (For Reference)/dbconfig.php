@@ -1,6 +1,6 @@
 <?php
     $database = 'withgpsuserdata';
-    $username = 'root';
+    $username = 'mohit';
     $password = '12345678';
     $servername = 'localhost';
 
