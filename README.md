@@ -1,5 +1,7 @@
 # Image Database
 
+Built as a hackathon project with [Pradeep Kumar](https://github.com/Pradeepkumar6)
+
 ## Specifications
 - Backend: PHP, MySQL
 - Frontend: Flutter
