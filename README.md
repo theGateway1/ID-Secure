@@ -1,16 +1,8 @@
-# ID Secure
-
-Built as a hackathon project with [Pradeep Kumar](https://github.com/Pradeepkumar6)
-
 ## Specifications
 - Backend: PHP, MySQL
 - Frontend: Flutter
 - Server OS: Ubuntu 18.04 x64 (VPS: Digital Ocean)
 - Hosted At: http://143.244.129.37/
-
-## APK File
-Download the APK file: [APK.zip](https://github.com/codedog001/flutter_MySQL_app/files/6526297/APK.zip)
-
 
  ## Usage
 - Sign up using name, email and password.
